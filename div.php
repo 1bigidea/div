@@ -20,7 +20,7 @@
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
  *
  * @author Rafael Rodriguez Ramirez <rafa@pragres.com>
- * @version: 4.0
+ * @version: 4.2
  * @link http://divengine.com
  */
 
@@ -102,6 +102,7 @@ define('DIV_UNICODE_ERROR', -1);
 define('DIV_MOMENT_BEFORE_PARSE', 'DIV_MOMENT_BEFORE_PARSE');
 define('DIV_MOMENT_AFTER_PARSE', 'DIV_MOMENT_AFTER_PARSE');
 define('DIV_MOMENT_AFTER_INCLUDE', 'DIV_MOMENT_AFTER_INCLUDE');
+define('DIV_MOMENT_AFTER_REPLACE' , 'DIV_MOMENT_AFTER_REPLACE');
 
 //------------------------------------- D E F A U L T   D I A L E C T --------------------------------------//
 if (!defined('DIV_TAG_REPLACEMENT_PREFIX'))                   define('DIV_TAG_REPLACEMENT_PREFIX', '{');                    // Variables
@@ -219,6 +220,66 @@ if (!defined('DIV_TAG_SPECIAL_REPLACE_NEXT_PAGE'))            define('DIV_TAG_SP
 if (!defined('DIV_TAG_SPECIAL_REPLACE_DOLLAR_SYMBOL'))        define('DIV_TAG_SPECIAL_REPLACE_DOLLAR_SYMBOL', '{\$}');
 if (!defined('DIV_TAG_TEASER_BREAK'))                         define('DIV_TAG_TEASER_BREAK', '<!--break-->');
 
+define('DIV_DEFAULT_DIALECT','{
+		\'DIV_TAG_REPLACEMENT_PREFIX\' : \'{\',		    \'DIV_TAG_REPLACEMENT_SUFFIX\' : \'}\',
+		\'DIV_TAG_MULTI_MODIFIERS_PREFIX\' : \'{$\',	\'DIV_TAG_MULTI_MODIFIERS_SEPARATOR\' : \'|\',
+		\'DIV_TAG_MULTI_MODIFIERS_OPERATOR\' : \'|\',	\'DIV_TAG_MULTI_MODIFIERS_SUFFIX\' : \'|}\',
+		\'DIV_TAG_SUBMATCH_SEPARATOR\' : \':\',		    \'DIV_TAG_MODIFIER_SIMPLE\' : \'$\',
+		\'DIV_TAG_MODIFIER_CAPITALIZE_FIRST\' : \'^\',	\'DIV_TAG_MODIFIER_CAPITALIZE_WORDS\' : \'^^\',
+		\'DIV_TAG_MODIFIER_UPPERCASE\' : \'^^^\',		\'DIV_TAG_MODIFIER_LOWERCASE\' : \'_\',
+		\'DIV_TAG_MODIFIER_LENGTH\' : \'%\',		    \'DIV_TAG_MODIFIER_COUNT_WORDS\' : \'%%\',
+		\'DIV_TAG_MODIFIER_COUNT_SENTENCES\' : \'%%%\',	\'DIV_TAG_MODIFIER_COUNT_PARAGRAPHS\' : \'%%%%\',
+		\'DIV_TAG_MODIFIER_ENCODE_URL\' : \'&\',		\'DIV_TAG_MODIFIER_ENCODE_RAW_URL\' : \'&&\',
+		\'DIV_TAG_MODIFIER_ENCODE_JSON\' : \'json:\',	\'DIV_TAG_MODIFIER_HTML_ENTITIES\' : \'html:\',
+		\'DIV_TAG_MODIFIER_NL2BR\' : \'br:\',		    \'DIV_TAG_MODIFIER_TRUNCATE\' : \'~\',
+		\'DIV_TAG_MODIFIER_WORDWRAP\' : \'/\',		    \'DIV_TAG_MODIFIER_SUBSTRING_SEPARATOR\' : \',\',
+		\'DIV_TAG_MODIFIER_SINGLE_QUOTES\' : "\'",		\'DIV_TAG_MODIFIER_JS\' :  \'js:\',
+		\'DIV_TAG_MODIFIER_FORMAT\' : \'\',		        \'DIV_TAG_DATE_FORMAT_PREFIX\' : \'{/\',
+		\'DIV_TAG_DATE_FORMAT_SUFFIX\' : \'/}\',		\'DIV_TAG_DATE_FORMAT_SEPARATOR\' : \':\',
+		\'DIV_TAG_NUMBER_FORMAT_PREFIX\' : \'{#\',		\'DIV_TAG_NUMBER_FORMAT_SUFFIX\' : \'#}\',
+		\'DIV_TAG_NUMBER_FORMAT_SEPARATOR\' : \':\',	\'DIV_TAG_FORMULA_BEGIN\' : \'(#\',
+		\'DIV_TAG_FORMULA_END\' : \'#)\',		        \'DIV_TAG_FORMULA_FORMAT_SEPARATOR\' : \':\',
+		\'DIV_TAG_SUBPARSER_BEGIN_PREFIX\' : \'{\',		\'DIV_TAG_SUBPARSER_BEGIN_SUFFIX\' : \'}\',
+		\'DIV_TAG_SUBPARSER_END_PREFIX\' : \'{/\',		\'DIV_TAG_SUBPARSER_END_SUFFIX\' : \'}\',
+		\'DIV_TAG_IGNORE_BEGIN\' : \'{ignore}\',		\'DIV_TAG_IGNORE_END\' : \'{/ignore}\',
+		\'DIV_TAG_COMMENT_BEGIN\' : \'<!--{\',		    \'DIV_TAG_COMMENT_END\' : \'}-->\',
+		\'DIV_TAG_TXT_BEGIN\' : \'{txt}\',		        \'DIV_TAG_TXT_END\' : \'{/txt}\',			
+		\'DIV_TAG_TXT_WIDTH_SEPARATOR\' : \'=>\',		\'DIV_TAG_STRIP_BEGIN\' : \'{strip}\',
+		\'DIV_TAG_STRIP_END\' : \'{/strip}\',		    \'DIV_TAG_LOOP_BEGIN_PREFIX\' : \'[$\',
+		\'DIV_TAG_LOOP_BEGIN_SUFFIX\' : \']\',		    \'DIV_TAG_LOOP_END_PREFIX\' : \'[/$\',
+		\'DIV_TAG_LOOP_END_SUFFIX\' : \']\',		    \'DIV_TAG_EMPTY\' : \'@empty@\',
+		\'DIV_TAG_BREAK\' : \'@break@\',		        \'DIV_TAG_LOOP_VAR_SEPARATOR\' : \'=>\',
+		\'DIV_TAG_ITERATION_BEGIN_PREFIX\' : \'[:\',	\'DIV_TAG_ITERATION_BEGIN_SUFFIX\' : \':]\',
+		\'DIV_TAG_ITERATION_END\' : \'[/]\',		                \'DIV_TAG_ITERATION_PARAM_SEPARATOR\' : \',\',
+		\'DIV_TAG_CONDITIONAL_TRUE_BEGIN_PREFIX\' :  \'?$\',	    \'DIV_TAG_CONDITIONAL_TRUE_BEGIN_SUFFIX\' : \'\',
+		\'DIV_TAG_CONDITIONAL_TRUE_END_PREFIX\' :    \'$\',		    \'DIV_TAG_CONDITIONAL_TRUE_END_SUFFIX\' : \'?\',
+		\'DIV_TAG_CONDITIONAL_FALSE_BEGIN_PREFIX\' : \'!$\',	    \'DIV_TAG_CONDITIONAL_FALSE_BEGIN_SUFFIX\' : \'\',
+		\'DIV_TAG_CONDITIONAL_FALSE_END_PREFIX\' :   \'$\',	        \'DIV_TAG_CONDITIONAL_FALSE_END_SUFFIX\' : \'!\',
+		\'DIV_TAG_ELSE\' : \'@else@\',		                        \'DIV_TAG_CONDITIONS_BEGIN_PREFIX\' : \'{?(\',
+		\'DIV_TAG_CONDITIONS_BEGIN_SUFFIX\' : \')?}\',		        \'DIV_TAG_CONDITIONS_END\' : \'{/?}\',
+		\'DIV_TAG_TPLVAR_BEGIN\' : \'{=\',		                    \'DIV_TAG_TPLVAR_END\' : \'=}\',
+		\'DIV_TAG_TPLVAR_ASSIGN_OPERATOR\' : \':\',		            \'DIV_TAG_TPLVAR_PROTECTOR\' : \'*\',
+		\'DIV_TAG_DEFAULT_REPLACEMENT_BEGIN\' : \'{@\',		        \'DIV_TAG_DEFAULT_REPLACEMENT_END\' : \'@}\',
+		\'DIV_TAG_INCLUDE_BEGIN\' : \'{% \',		                \'DIV_TAG_INCLUDE_END\' : \' %}\',
+		\'DIV_TAG_PREPROCESSED_BEGIN\' : \'{%% \',		            \'DIV_TAG_PREPROCESSED_END\' : \' %%}\',
+		\'DIV_TAG_CAPSULE_BEGIN_PREFIX\' : \'[[\',		            \'DIV_TAG_CAPSULE_BEGIN_SUFFIX\' : \'\',
+		\'DIV_TAG_CAPSULE_END_PREFIX\' : \'\',		                \'DIV_TAG_CAPSULE_END_SUFFIX\' : \']]\',
+		\'DIV_TAG_MULTI_REPLACEMENT_BEGIN_PREFIX\' : \'{:\', 	    \'DIV_TAG_MULTI_REPLACEMENT_BEGIN_SUFFIX\' : \'}\',
+		\'DIV_TAG_MULTI_REPLACEMENT_END_PREFIX\' : \'{:/\',		    \'DIV_TAG_MULTI_REPLACEMENT_END_SUFFIX\' : \'}\',
+		\'DIV_TAG_FRIENDLY_BEGIN\' : \'<!--|\',		                \'DIV_TAG_FRIENDLY_END\' : \'|-->\',
+		\'DIV_TAG_AGGREGATE_FUNCTION_COUNT\' : \'count\',		    \'DIV_TAG_AGGREGATE_FUNCTION_MAX\' : \'max\',
+		\'DIV_TAG_AGGREGATE_FUNCTION_MIN\' : \'min\',		        \'DIV_TAG_AGGREGATE_FUNCTION_SUM\' : \'sum\',
+		\'DIV_TAG_AGGREGATE_FUNCTION_AVG\' : \'avg\',		        \'DIV_TAG_AGGREGATE_FUNCTION_SEPARATOR\' : \':\',
+		\'DIV_TAG_AGGREGATE_FUNCTION_PROPERTY_SEPARATOR\' : \'-\',	\'DIV_TAG_LOCATION_BEGIN\' : \'(( \',
+		\'DIV_TAG_LOCATION_END\' : \' ))\',		                    \'DIV_TAG_LOCATION_CONTENT_BEGIN_PREFIX\' : \'{{\',
+		\'DIV_TAG_LOCATION_CONTENT_BEGIN_SUFFIX\' : \'\',		    \'DIV_TAG_LOCATION_CONTENT_END_PREFIX\' : \'\',
+		\'DIV_TAG_LOCATION_CONTENT_END_SUFFIX\' : \'}}\',		    \'DIV_TAG_MACRO_BEGIN\' : \'<?\',
+		\'DIV_TAG_MACRO_END\' : \'?>\',		                        \'DIV_TAG_SPECIAL_REPLACE_NEW_LINE\' : \'{\\n}\',
+		\'DIV_TAG_SPECIAL_REPLACE_CAR_RETURN\' : \'{\\r}\',		    \'DIV_TAG_SPECIAL_REPLACE_HORIZONTAL_TAB\' : \'{\\t}\',
+		\'DIV_TAG_SPECIAL_REPLACE_VERTICAL_TAB\' : \'{\\v}\',		\'DIV_TAG_SPECIAL_REPLACE_NEXT_PAGE\' : \'{\\f}\',
+		\'DIV_TAG_SPECIAL_REPLACE_DOLLAR_SYMBOL\' : \'{\\$}\',		\'DIV_TAG_TEASER_BREAK\' : \'<!--break-->\'
+		}');
+
 //--------------------------------------------------------------------------------------------------------------------------------------//
 
 /**
@@ -242,7 +303,7 @@ class div{
 	public $__restore = array();          // template's parts to restore after parse
 	public $__packages = PACKAGES;        // path of current templates's root folder
 	public $__properties = array();       // properties of the template
-	
+
 	// Private
 	private $__id = null;                 // template id
 	private $__temp = array();            // temporal vars
@@ -251,26 +312,26 @@ class div{
 	// Globals
 	private static $__custom_modifiers = array();  // custom variable's modifiers
 	private static $__globals = array();           // global template's variables
-	private static $__globals_design = array();    // global template's variables defined in the design 
+	private static $__globals_design = array();    // global template's variables defined in the design
 	private static $__globals_design_protected = array(); // global and protected template variables defined in the design
 	private static $__defaults = array();                 // default value for another value
 	private static $__defaults_by_var = array();          // default value for another value by variable
-	private static $__system_data = null;                 // system data                 
+	private static $__system_data = null;                 // system data
 	private static $__system_data_allowed = array('div.version' => true, 'div.post' => true, 'div.get' => true, 'div.now' => true);
 	private static $__discard_file_system = false;        // do not load code from files
 	private static $__allowed_functions = array();        // list of allowed custom functions
 	private static $__allowed_methods = null;             // list of allowed class's methods
 	private static $__sub_parsers = array();              // list of subparsers
+	private static $__docs = array();					  // template's documentation
 
 	// Internals
-	private static $__version = '4.0';                    // current version of Div
+	private static $__version = '4.2';                    // current version of Div
 	private static $__super_class = null;                 // name of the super class
 	private static $__parent_method_names = array();      // name of parent class's methods
 	private static $__method_names = null;                // name of current methods
 	private static $__parse_duration = null;              // duration of parser
 	private static $__parse_level = 0;                    // current level of parser
 	private static $__engine = null;                      // auxiliary engine
-
 	private static $__modifiers = array(                  // variable's modifiers
 	DIV_TAG_MODIFIER_SIMPLE, DIV_TAG_MODIFIER_CAPITALIZE_FIRST,
 	DIV_TAG_MODIFIER_CAPITALIZE_WORDS, DIV_TAG_MODIFIER_UPPERCASE,
@@ -281,7 +342,7 @@ class div{
 	DIV_TAG_MODIFIER_NL2BR, DIV_TAG_MODIFIER_ENCODE_JSON,
 	DIV_TAG_MODIFIER_SINGLE_QUOTES, DIV_TAG_MODIFIER_JS);
 
-	private static $__dialect_checked = false;           // is current dialect checked? 
+	private static $__dialect_checked = false;           // is current dialect checked?
 	private static $__allowed_php_functions = null;      // allowed PHP functions
 	private static $__log_mode = false;                  // is log mode?
 	private static $__log_file = null;                   // the log filename
@@ -419,6 +480,7 @@ class div{
 	final public function getId(){
 		return $this->__id;
 	}
+
 	/**
 	 * Create an auxiliar instance (as singleton)
 	 *
@@ -521,7 +583,6 @@ class div{
 				self::$__system_data['div.script_name'] = $script_name;
 			}
 		}
-
 		return self::$__system_data;
 	}
 
@@ -617,7 +678,7 @@ class div{
 	 */
 	final static function repairSubparsers(){
 
-		$events = array('beforeParse', 'afterInclude', 'afterParse');
+		$events = array('beforeParse', 'afterInclude', 'afterParse', 'afterReplace');
 		$news = array();
 
 		foreach(self::$__sub_parsers as $parser => $function){
@@ -798,79 +859,90 @@ class div{
 
 			$ltagini = strlen($tagini);
 			$ltagend = strlen($tagend);
+			do{
 
-			$ini = strpos($src, $tagini);
+				$ini = strpos($src, $tagini, $pos);
 
-			if ($ini !== false) {
+				if ($ini !== false) {
 
-				if (isset($src[$ini + $ltagini])) {
+					if (isset($src[$ini + $ltagini])) {
 
-					$fin = strpos($src, $tagend, $ini + $ltagini);
+						$fin = strpos($src, $tagend, $ini + $ltagini);
 
-					if ($fin !== false) {
+						if ($fin !== false) {
 
-						$l = strlen($src);
-						$last_pos = -1;
+							$l = strlen($src);
+							$last_pos = -1;
 
-						while (true) {
-							$ini = strpos($src, $tagini, $pos);
-							if ($ini === false || ($ini !== false && $pos == $last_pos)) break;
+							while (true) {
+								$ini = strpos($src, $tagini, $pos);
 
-							$end = false;
-							$plus = 1;
-							$posi = $ini + $ltagini;
-							$last_posi = $posi - 1;
+								if ($ini === false || ($ini !== false && $pos == $last_pos)) break;
 
-							while (true){
-								$open = strpos($src, $tagini, $posi);
-								$close = strpos($src, $tagend, $posi);
+								$end = false;
+								$plus = 1;
+								$posi = $ini + $ltagini;
+								$last_posi = $posi - 1;
 
-								if ($open === false && $close === false) break; // ni abrieron ni cerraron
-								if ($open === false && $close !== false && $posi === $last_posi) break; // cerraron y no abrieron
-								if ($open !== false && $close === false && $posi === $last_posi) break; // abrieron y no cerraron
+								while (true){
+									$open = strpos($src, $tagini, $posi);
+									$close = strpos($src, $tagend, $posi);
 
-								if ($open !== false || $close !== false){ // si abrieron OR cerraron
-									if (($close < $open || $open === false) && $close !== false){ // CERRAR si cerraron y fue antes de abrir o no abrieron
-										$last_posi = $posi;
-										$posi = $close + $ltagend;
-										$plus--;
-										// no separar el siguiente IF del else
-									} elseif (($open < $close || $close === false) && $open !== false){ // ABRIR si abrieron y fue antes de cerrar o no cerraron
-										$last_posi = $posi;
-										$posi = $open + $ltagini;
-										$plus++;
+									if ($open === false && $close === false) break; // not open and not close
+									if ($open === false && $close !== false && $posi === $last_posi) break; // close and not open
+									if ($open !== false && $close === false && $posi === $last_posi) break; // open and not close
+
+									if ($open !== false || $close !== false){ // open or close
+										if (($close < $open || $open === false) && $close !== false){ // close if is closed and before open or not open
+											$last_posi = $posi;
+											$posi = $close + $ltagend;
+											$plus--;
+											// IMPORTANT! Don't separate elseif
+										} elseif (($open < $close || $close === false) && $open !== false){ // open if is opened and before close or not close
+											$last_posi = $posi;
+											$posi = $open + $ltagini;
+											$plus++;
+										}
 									}
+
+									if ($plus === 0){ // all opens are closed
+										$end = $close;
+										break;
+									}
+
+									if ($open >= $l) break;
 								}
 
-								if ($plus === 0){ // si todas las aperturas fueron cerradas
-									$end = $close;
-									break;
+								$last_pos = $pos;
+
+								if ($end != false){
+									$ranges[] = array($ini, $end);
+									if ($onlyfirst == true) break;
+									$pos = $ini + $ltagini;
+									continue;
 								}
-
-								if ($open >= $l) break;
-							}
-
-							$last_pos = $pos;
-
-							if ($end != false){
-								$ranges[] = array($ini, $end);
-								if ($onlyfirst == true) break;
-								$pos = $ini + $ltagini;
-								continue;
-							}
-						}
-
-						if (!isset($ranges[0])) if (self::$__log_mode) if (isset($this)) {
-							foreach($this->__items as $key => $value) if (strpos($tagini, $key) !== false) {
-								$this->logger('Unclosed tag '.$tagini. ' at '.$ini.' character','SYNTAX');
-								break;
+									
 							}
 						}
 					}
 				}
-			}
-		}
 
+				if (!isset($ranges[0]) && $ini !==false) {
+					if (self::$__log_mode) if (isset($this)) {
+						foreach($this->__items as $key => $value) if (strpos($tagini, $key) !== false) {
+							$this->logger('Unclosed tag '.$tagini. ' at '.$ini.' character','SYNTAX');
+							break;
+						}
+					}
+
+					$pos = $ini + 1;
+
+					continue;
+				}
+
+				break;
+			} while(true);
+		}
 		return $ranges;
 	}
 
@@ -1183,6 +1255,7 @@ class div{
 			$lelse = strlen(DIV_TAG_ELSE);
 
 			while(true){
+
 				if (strpos($src, $tag_begin) === false) break;
 				$ranges = $this->getRanges($tag_begin, $tag_end, $src, true, $pos);
 
@@ -1204,6 +1277,7 @@ class div{
 					}
 
 					$subsrc = substr($src, $ini + $l, $fin - ($ini + $l));
+
 					$else = $this->getElseTag($subsrc);
 
 					if ($value === $flag){
@@ -1226,9 +1300,15 @@ class div{
 							$src = substr($src, 0, $ini).$con.substr($src, $fin + $l2);
 						}
 					}
-				} else break;
+
+					$pos = $ini + 1;
+				} else {
+					break;
+				}
 			}
+
 		}
+
 	}
 
 	/**
@@ -1476,8 +1556,6 @@ class div{
 						self::setVarValue($key, $value,$this->__items);
 					}
 				}
-
-
 
 				$mod = DIV_TAG_MODIFIER_SIMPLE;
 				$substr = str_replace($prefix.$mod.$key.$suffix, $value, $substr, $rcount); // simple replacement
@@ -1991,12 +2069,20 @@ class div{
 		$l1 = strlen(DIV_TAG_IGNORE_BEGIN);
 		$l2 = strlen(DIV_TAG_IGNORE_END);
 
+		$pos = 0;
 		while(true){
-			$ranges = $this->getRanges(DIV_TAG_IGNORE_BEGIN, DIV_TAG_IGNORE_END,  null, true);
+			$ranges = $this->getRanges(DIV_TAG_IGNORE_BEGIN, DIV_TAG_IGNORE_END,  null, true, $pos);
 			if (count($ranges) < 1) break;
+
+			if (self::searchInRanges($this->getRanges(DIV_TAG_COMMENT_BEGIN, DIV_TAG_COMMENT_END),$ranges[0][0])!==false){
+				$pos = $ranges[0][1]+1;
+				continue;
+			}
+
 			$id = uniqid();
 			self::$__ignored_parts[$id] = substr($this->__src, $ranges[0][0] + $l1, $ranges[0][1] - $ranges[0][0] - $l1);
 			$this->__src = substr($this->__src, 0, $ranges[0][0]).'{'.$id.'}'.substr($this->__src, $ranges[0][1] + $l2);
+			$pos = $ranges[0][1]+1;
 		}
 
 		return self::$__ignored_parts;
@@ -2109,6 +2195,11 @@ class div{
 
 			if (!$procede) continue;
 
+			if (self::searchInRanges($this->getRanges(DIV_TAG_COMMENT_BEGIN, DIV_TAG_COMMENT_END),$ranges[0][0])!==false){
+				$pos = $fin + 1;
+				continue;
+			}
+
 			$path = trim(substr($this->__src, $ini + $l1, $fin - $ini - $l1));
 			$path = $this->getTplPath($path);
 
@@ -2116,9 +2207,34 @@ class div{
 				if (self::fileExists($path)){
 					$c = "[[]] ERROR: TEMPLATE '$path' NOT FOUND OR IS NOT A TEMPLATE!";
 					if (!is_dir($path)){
+
 						$c = self::getFileContents($path);
 						$tpl_prop = $this->getTemplateProperties($c);
 						$c = $this->prepareDialect($c, $tpl_prop);
+
+						$engine = self::getAuxiliaryEngineClone($items);
+						$engine->__src = $c;
+						$engine->parseComments($path);
+						$c = $engine->__src;
+						unset($engine);
+
+						if (file_exists($this->__path) || file_exists(PACKAGES.$this->__path)){
+
+							$section = trim($this->__path);
+							$contained = trim($path);
+
+							if (substr($section, 0, 2)=='./') $section = substr($this->__path, 2);
+							if (substr($contained, 0, 2)=='./') $contained = substr($path, 2);
+
+							if (!isset(self::$__docs[$section])) self::$__docs[$section] = array();
+							if (!isset(self::$__docs[$section]['include'])) self::$__docs[$section]['include'] = array();
+							self::$__docs[$section]['include'][] = $contained;
+
+							if (!isset(self::$__docs[$contained])) self::$__docs[$contained] = array();
+							if (!isset(self::$__docs[$contained]['includedby'])) self::$__docs[$contained]['includedby'] = array();
+							self::$__docs[$contained]['includedby'][] = $section;
+						}
+
 					} else if (self::$__log_mode) $this->logger($c);
 
 					$lenc = strlen($c);
@@ -2203,6 +2319,25 @@ class div{
 				$c = self::getFileContents($path);
 				$engine = self::getAuxiliaryEngineClone($items);
 				$engine->__src = $c;
+
+				if (file_exists($this->__path) || file_exists(PACKAGES.$this->__path)){
+
+					$section = trim($this->__path);
+					$contained = trim($path);
+
+					if (substr($section, 0, 2)=='./') $section = substr($this->__path, 2);
+					if (substr($contained, 0, 2)=='./') $contained = substr($path, 2);
+
+					if (!isset(self::$__docs[$section])) self::$__docs[$section] = array();
+					if (!isset(self::$__docs[$section]['preprocess'])) self::$__docs[$section]['include'] = array();
+					self::$__docs[$section]['preprocess'][] = $contained;
+
+					if (!isset(self::$__docs[$contained])) self::$__docs[$contained] = array();
+					if (!isset(self::$__docs[$contained]['preprocessedby'])) self::$__docs[$contained]['preprocessedby'] = array();
+					self::$__docs[$contained]['preprocessedby'][] = $section;
+				}
+
+				$engine->__path = $path;
 				$engine->parse(false);
 				$pre = $engine->__src;
 				$this->__src = substr($this->__src, 0, $ini). $pre . substr($this->__src, $fin + $l2);
@@ -2219,12 +2354,55 @@ class div{
 	/**
 	 * Parse comments
 	 *
+	 * @param string $section
 	 */
-	final public function parseComments(){
+	final public function parseComments($section = null){
+
+		if (is_null($section)) $section = trim($this->__path);
+		if ($section == '') $section = uniqid();
+		if (substr($section,0,2)=='./') $section = substr($section,2);
+
 		if (self::$__log_mode) $this->logger("Parsing comments...");
+		$lbegin = strlen(DIV_TAG_COMMENT_BEGIN);
 		while(true){
 			$ranges = $this->getRanges(DIV_TAG_COMMENT_BEGIN, DIV_TAG_COMMENT_END, null, true);
 			if (count($ranges) < 1) break;
+
+			// Documentation
+			$subsrc = substr($this->__src, $ranges[0][0]+$lbegin, $ranges[0][1]-$ranges[0][0] - $lbegin);
+			$arr = explode("\n", $subsrc);
+
+			$last_prop = '';
+			foreach($arr as $line){
+				$line = str_replace("\r\n","\n",$line);
+				$line = trim($line);
+				$line = str_replace("\t"," ",$line);
+
+				if (isset($line[0])) {
+					if ($last_prop !== '') if ($line[0] !== '@') $line = '@'.$last_prop.' '.$line;
+					if ($line[0] == '@'){
+						$p = strpos($line," ");
+						if ($p !== false){
+							$prop = substr($line,1,$p-1);
+							$value = trim(substr($line,$p));
+						} else {
+							$prop = substr($line,1);
+							$value = "";
+						}
+
+						if (!isset(self::$__docs[$section])) self::$__docs[$section] = array();
+						if (isset(self::$__docs[$section][$prop]))	{
+							if (!is_array(self::$__docs[$section][$prop])) self::$__docs[$section][$prop] = array(self::$__docs[$section][$prop]);
+							self::$__docs[$section][$prop][] = $value;
+						} else self::$__docs[$section][$prop] = $value;
+
+						$last_prop = $prop;
+							
+					}
+				}
+			}
+
+			// Extract
 			$this->__src = substr($this->__src, 0, $ranges[0][0]) . substr($this->__src, $ranges[0][1] + strlen(DIV_TAG_COMMENT_END));
 		}
 	}
@@ -2348,8 +2526,8 @@ class div{
 
 		$var = trim($var);
 		$parts = explode(".",$var);
-		$current = $itemsx;
 
+		$current = $itemsx;
 		foreach($parts as $part){
 
 			if (trim($part) == "") return null;
@@ -2357,11 +2535,28 @@ class div{
 			if (is_array($current)){
 				if (isset($current[$part])){
 					$current = $current[$part];
-				} else return null;
+				} else {
+					$current = null;
+					break;
+				}
 			} elseif (is_object($current)) {
 				if (isset($current->$part)){
 					$current = $current->$part;
-				} else return null;
+				} else {
+					$current = null;
+					break;
+				}
+			}
+		}
+
+		if (is_null($current)){
+			$s = '';
+			foreach($parts as $part){
+				if (isset($itemsx[$s.$part])) {
+					$current = self::getVarValue(substr($var, strlen($s.$part) + 1),$itemsx[$s.$part]);
+					if (!is_null($current)) break;
+				}
+				$s .= $part.".";
 			}
 		}
 
@@ -3229,7 +3424,7 @@ class div{
 			$s = substr($this->__src, $ranges[0][0] + $lprefix, $ranges[0][1] - $ranges[0][0] - $lprefix);
 			$s = str_replace('\\'.DIV_TAG_DATE_FORMAT_SEPARATOR, $temp, $s);
 
-			$p = strrpos($s, DIV_TAG_DATE_FORMAT_SEPARATOR);
+			$p = strpos($s, DIV_TAG_DATE_FORMAT_SEPARATOR);
 			if ($p !== false){
 				$var = substr($s, 0, $p);
 				if(!isset($items[$var])) $items[$var] = $var;
@@ -3557,6 +3752,9 @@ class div{
 
 		if (is_null($items)) $items = &$this->__items;
 
+		$itemsx = array_merge($this->__memory, $items);
+		if (!isset($flags['level'])) $flags['level'] = self::$__parse_level;
+			
 		foreach (self::$__sub_parsers as $parser => $function){
 
 			// Checking the moment/event
@@ -3567,6 +3765,7 @@ class div{
 					if ($last == 'beforeParse' && $flags['moment'] != DIV_MOMENT_BEFORE_PARSE) continue;
 					if ($last == 'afterInclude' && $flags['moment'] != DIV_MOMENT_AFTER_INCLUDE) continue;
 					if ($last == 'afterParse' && $flags['moment'] != DIV_MOMENT_AFTER_PARSE) continue;
+					if ($last == 'afterReplace' && $flags['moment'] != DIV_MOMENT_AFTER_REPLACE) continue;
 				}
 			}
 
@@ -3575,7 +3774,7 @@ class div{
 			$lpini = strlen($pini);
 
 			$code = $function;
-			if (method_exists($this,$function)) $code = '$this->'.$function;
+			if (method_exists($this, $function)) $code = '$this->'.$function;
 
 			$ignore = false;
 			$p = 0;
@@ -3587,12 +3786,14 @@ class div{
 				$ini = $ranges[0][0];
 				$fin = $ranges[0][1];
 
+				if ($this->searchInListRanges($ini)) {$p = $ini + 1; $ignore = true; continue;}
+
 				if (DIV_TAG_SUBPARSER_BEGIN_SUFFIX == '' && strpos("\n\t <>", substr($this->__src, $ini + $pini,1)) === false) {$p = $ini + 1; continue;}
 				if (DIV_TAG_SUBPARSER_END_PREFIX == '' && strpos("\n\t <>", substr($this->__src, $fin - 1, 1)) === false) {$p = $ini + 1; continue;}
 
 				$subsrc = substr($this->__src, $ini + $lpini, $fin - $ini - $lpini);
 				$r = "";
-				eval('$r = '.$code.'($subsrc, $items, $flags);');
+				eval('$r = '.$code.'($subsrc, $itemsx, $flags);');
 				if ($r !== false) {
 					$this->__src = substr($this->__src,0,$ini).$r.substr($this->__src, $fin + $lpini + 1);
 					$p = $ini;
@@ -3604,10 +3805,12 @@ class div{
 
 			if (strpos($this->__src, $pini) !== false && !$ignore) {
 				$r = "";
-				eval('$r = '.$code.'(false, $items, $flags);');
+				eval('$r = '.$code.'(false, $itemsx, $flags);');
 				if ($r !== false) $this->__src = str_replace($pini, $r, $this->__src, $rcount);
 			}
 		}
+
+		$this->memory($itemsx);
 	}
 
 	/**
@@ -3718,19 +3921,22 @@ class div{
 					if (self::isValidVarName($key))
 					$this->__temp['codevars'] .= '$'.$key.' = $items["'.$key.'"];';
 				}
-				if ($this->__temp['codevars']!='') eval($this->__temp['codevars']);
 
 				$this->__temp['items'] = $items;
 
-				unset($items);
 				unset($key);
 				unset($value);
 				unset($classname);
+
+				if ($this->__temp['codevars']!='') eval($this->__temp['codevars']);
+
+				unset($items);
 
 				// Executing the macro
 				eval($this->__temp['code']);
 
 				$vars = get_defined_vars();
+
 				$items = $this->__temp['items'];
 
 				foreach($vars as $var => $value) {
@@ -3768,6 +3974,7 @@ class div{
 	 */
 	final private function makeItAgain($checksum, &$items){
 		$simple = DIV_TAG_REPLACEMENT_PREFIX.DIV_TAG_MODIFIER_SIMPLE;
+
 		foreach(self::$__remember[$checksum] as $params){
 			switch ($params['o']){
 				case 'replace_submatch_teaser':
@@ -3908,15 +4115,15 @@ class div{
 		if (is_null($properties)) $properties = $this->__properties;
 
 		if (isset($properties['DIALECT'])){
-			$f = $properties['DIALECT'];
-			if (self::fileExists($this->__packages.$f)) {
-				$json = file_get_contents($this->__packages.$f);
-				if (!is_null($json)){
-					$src = $this->translateFrom($json, $src);
-				} else if (self::$__log_mode) $this->log('The dialect '.$f.' is corrupt or invalid');
-			} elseif (self::$__log_mode) $this->log('Dialect '.$f.' not found');
-		}
+			$f = trim($properties['DIALECT']);
 
+			if (self::fileExists($this->__packages.$f) && $f !== '') $json = file_get_contents($this->__packages.$f);
+			else $json = DIV_DEFAULT_DIALECT;
+
+			if (!is_null($json)){
+				$src = $this->translateFrom($json, $src);
+			} else if (self::$__log_mode) $this->log('The dialect '.$f.' is corrupt or invalid');
+		}
 		return $src;
 	}
 
@@ -3971,10 +4178,7 @@ class div{
 			if (!isset($items['_empty'])) $items['_empty'] = array();
 			if (!isset($items['_'])) $items['_'] = array();
 
-			if (strpos($this->__src,  DIV_TAG_SUBPARSER_BEGIN_PREFIX) !== false) $this->parseSubParsers($items, array(
-				'moment' => DIV_MOMENT_BEFORE_PARSE,
-				'level' => self::$__parse_level
-			));
+			if (strpos($this->__src,  DIV_TAG_SUBPARSER_BEGIN_PREFIX) !== false) $this->parseSubParsers($items, array('moment' => DIV_MOMENT_BEFORE_PARSE));
 
 			// Template's properties
 			$this->loadTemplateProperties();
@@ -4001,7 +4205,11 @@ class div{
 
 					$checksum = crc32($this->__src);
 
-					if (isset(self::$__remember[$checksum])) $this->makeItAgain($checksum, $items);
+					if (isset(self::$__remember[$checksum])) {
+						$this->makeItAgain($checksum, $items);
+						if (strpos($this->__src,  DIV_TAG_SUBPARSER_BEGIN_PREFIX) !== false)
+						$this->parseSubParsers($items, array('moment' => DIV_MOMENT_AFTER_REPLACE));
+					}
 
 					if (self::$__log_mode === true) {
 						$this->logger('Template | size: '.strlen($this->__src));
@@ -4026,14 +4234,10 @@ class div{
 					// Include
 					if (strpos($this->__src,  DIV_TAG_INCLUDE_BEGIN) !== false) {
 						$this->parseInclude($items);
-						if (strpos($this->__src,  DIV_TAG_SUBPARSER_BEGIN_PREFIX) !== false) {
-							$items = array_merge($this->__memory, $items);
-							$this->parseSubParsers($items, array(
-								'moment' => DIV_MOMENT_AFTER_INCLUDE,
-								'level' => self::$__parse_level
-							));
-							$this->memory($items);
-						}
+
+						if (strpos($this->__src,  DIV_TAG_SUBPARSER_BEGIN_PREFIX) !== false)
+						$this->parseSubParsers($items, array('moment' => DIV_MOMENT_AFTER_INCLUDE));
+
 						if (strpos($this->__src,  DIV_TAG_IGNORE_BEGIN) !== false) $this->parseIgnore();
 						if (strpos($this->__src,  DIV_TAG_COMMENT_BEGIN) !== false) $this->parseComments();
 						if (strpos($this->__src,  DIV_TAG_FRIENDLY_BEGIN) !== false) $this->parseFriendly();
@@ -4073,7 +4277,7 @@ class div{
 					$this->parseList($items);
 
 					$items = array_merge($items, self::$__globals_design);
-
+						
 					// Capsules
 					if (strpos($this->__src,  DIV_TAG_CAPSULE_BEGIN_PREFIX) !== false)
 					if (strpos($this->__src,  DIV_TAG_CAPSULE_END_SUFFIX) !== false)
@@ -4091,6 +4295,11 @@ class div{
 					&& strpos($this->__src, DIV_TAG_NUMBER_FORMAT_SUFFIX) !== false))
 					$this->parseMatches($items);
 
+					// Subparse: after replace
+					if (strpos($this->__src,  DIV_TAG_SUBPARSER_BEGIN_PREFIX) !== false)
+					$this->parseSubParsers($items, array('moment' => DIV_MOMENT_AFTER_REPLACE));
+						
+						
 					// Iterations
 					if (strpos($this->__src,  DIV_TAG_ITERATION_BEGIN_PREFIX) !== false)
 					if (strpos($this->__src,  DIV_TAG_ITERATION_END) !== false)
@@ -4139,7 +4348,7 @@ class div{
 			if (strpos($this->__src,  DIV_TAG_LOCATION_CONTENT_BEGIN_PREFIX) !== false)
 			if (strpos($this->__src,  DIV_TAG_LOCATION_BEGIN) !== false)
 			$this->parseLocations();
-				
+
 			// Clear location's tags
 			if (strpos($this->__src,  DIV_TAG_LOCATION_BEGIN)!== false) $this->clearLocations();
 
@@ -4199,6 +4408,7 @@ class div{
 
 		// Calling the afterParse hook
 		$this->afterParse();
+
 	}
 
 	/**
@@ -5016,6 +5226,120 @@ class div{
 	}
 
 	//-------------------------------- Functions ------------------------------------- //
+
+	final static function getDocs(){
+		return self::$__docs;
+	}
+
+	final static function getDocsReadable($tpl = null, $items = null){
+
+		$docs = self::$__docs;
+		$keys = array_keys($docs);
+
+		asort($keys);
+		$docsx = array();
+
+		foreach($keys as $key) $docsx[$key] = $docs[$key];
+
+		if (is_null($items)) $items = array('title' => "Templates's documentation");
+
+		$items = array_merge($items, array('docs' => $docsx));
+
+		if (is_null($tpl)) $tpl = '
+		@_DIALECT = default
+		<html>
+			<head>
+				<title>{$title}</title>
+				<style>
+					body{
+						background: #656565;
+					}
+					div.section {
+						background: white;
+						margin-top: 20px;
+						padding: 10px;
+						width: 780px;
+					}
+					
+					.section h2 {
+					    color: white;
+					    font-size: 24px;
+					    font-weight: bold;
+					    margin-left: -30px;
+					    padding-bottom: 5px;
+					    padding-left: 30px;
+					    padding-top: 5px;
+						background: black;
+						border-left: 10px solid gray;
+					}
+	
+					h1{
+						color: white;
+					}
+					
+					.code {
+						padding: 5px;
+						background: #eeeeee;
+						color: black;
+						font-family: "Courier New";
+						text-align: left;
+						font-size: 13px;
+						 border: 1px dashed gray;
+					}
+										
+				</style>
+			</head>
+			<body>
+				<table width="750" align="center"><tr><td valign="top">
+				<h1>{$title}</h1>
+				<h2>Summary</h2>
+				<table>
+					<tr><th>Name</th><th>Author</th></tr>
+					[$docs]
+						<tr><td>{$name}</td><td>{$author}</td></tr>
+					[/$docs]
+				</table>
+				[$docs]
+					<div class="section">
+						<h2 id = "{$_key}">?$icon {$icon} $icon? {$name}</h2>
+						Template: <b>{$_key}</b><br/>
+						?$what-is-this <i>{$what-is-this}</i> $what-is-this?<br/>
+						?$author Author: {html:author}<br/> $author?
+						?$version Version: {$version}<br/> $version?
+						?$update Last update: {$update} $update?
+						<br/>
+						?$include
+							<h3>Include:</h3>
+							[$include]
+								{$_order}. <a href="#{$value}">{$value}</a><br/>
+							[/$include]
+						$include?
+						
+						?$includedby
+							<h3>Included by:</h3>
+							[$includedby]
+								{$_order}. <a href="#{$value}">{$value}</a><br/>
+							[/$includedby]
+						$includedby?
+						
+						?$example
+							<h3>Example:</h3>
+							<pre class="code">
+							[$example]{html:afterReplace}{$value}{/html:afterReplace}{\n}[/$example] 
+							</pre>
+						$example?
+					</div>
+				[/$docs]
+				</td></tr></table>
+			</body>
+		</html>
+		';
+
+		$obj = self::getAuxiliaryEngineClone($items);
+		$obj->__src = $tpl;
+		$obj->parse(false);
+		return $obj->__src;
+	}
 
 	/**
 	 * Convert any value to string (with Div method)
