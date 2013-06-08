@@ -3,7 +3,7 @@
 	<head>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 		<link rel="shortcut icon" href="div.ico" type="image/vnd.microsoft.icon" />
-		<title>Div PHP Template Engine 4.0</title>
+		<title>Div PHP Template Engine 4.2</title>
 		<style>
 			body {
 	font-family: Verdana;
@@ -241,7 +241,7 @@ ul.subsections li{
 			<tr>
 				<td style="padding-left: 20px;">
 					<span style="font-size: 10px; color: white;">
-						<h1><a class="white" href="http://divengine.com">[[]] Div PHP Template Engine 4.0</a></h1>
+						<h1><a class="white" href="http://divengine.com">[[]] Div PHP Template Engine 4.2</a></h1>
 						<hr/>
 					</span>
 				</td>
@@ -305,6 +305,7 @@ ul.subsections li{
 <a href ="#macros">Macros</a><br/>
 <a href ="#dialects">Custom "dialects" <span style="color: yellow;font-size:10px;font-weight: bold;"><sup>updated!</sup></span></a><br/>
 <a href ="#template-properties">Template's properties <span style="color: yellow;font-size:10px;font-weight: bold;"><sup>new!</sup></span></a><br/>
+<a href ="#template-docs">Template's documentation <span style="color: yellow;font-size:10px;font-weight: bold;"><sup>new!</sup></span></a><br/>
 </td></tr></table>
 					
 					</div>
@@ -347,7 +348,7 @@ ul.subsections li{
 
 
 
-<pre class="code div-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">{include file="header.tpl"}</td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">{foreach from = $products name = products}</td></tr><tr><td class = "line-number" align="right">4</td><td class="line-code">Product name: {$products.name}</td></tr><tr><td class = "line-number" align="right">5</td><td class="line-code">{if !$smarty.foreach.products.last},{/if} </td></tr><tr><td class = "line-number" align="right">6</td><td class="line-code">{/foreach}</td></tr><tr><td class = "line-number" align="right">7</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">8</td><td class="line-code">{include file="footer.tpl"}</td></tr></table></pre>
+<pre class="code div-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">{include file="header.tpl"}</td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">{foreach from = $products name = products}</td></tr><tr><td class = "line-number" align="right">4</td><td class="line-code">Product name: {$products.name}</td></tr><tr><td class = "line-number" align="right">5</td><td class="line-code">{if !$smarty.foreach.products.last},&#123;/if} </td></tr><tr><td class = "line-number" align="right">6</td><td class="line-code">&#123;/foreach}</td></tr><tr><td class = "line-number" align="right">7</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">8</td><td class="line-code">{include file="footer.tpl"}</td></tr></table></pre>
 	
 	</td><td valign="top">
 	Div:<br/>
@@ -844,7 +845,7 @@ ul.subsections li{
 
 
 
-<pre class="code out-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">Hello</td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code">Peter</td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">	Today is 2013-05-27</td></tr></table></pre>
+<pre class="code out-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">Hello</td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code">Peter</td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">	Today is 2013-06-07</td></tr></table></pre>
 	 
 	</td></tr></table>
 	
@@ -1665,7 +1666,7 @@ ul.subsections li{
 
 
 
-<pre class="code div-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">&lt;?php</td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">echo new div('index.tpl', array(</td></tr><tr><td class = "line-number" align="right">4</td><td class="line-code">	'products' =&gt; array(</td></tr><tr><td class = "line-number" align="right">5</td><td class="line-code">		array('name' =&gt; 'Banana', 'price' =&gt; 20.5),</td></tr><tr><td class = "line-number" align="right">6</td><td class="line-code">		array('name' =&gt; 'Potato', 'price' =&gt; 10.8)</td></tr><tr><td class = "line-number" align="right">7</td><td class="line-code">	)</td></tr><tr><td class = "line-number" align="right">8</td><td class="line-code">));</td></tr></table></pre>
+<pre class="code php-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code"><span class="php-open-tag">&lt;?php</span></td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code"><b>echo</b> <b>new</b> div(<span class="string">'index.tpl'</span>, <b>array</b>(</td></tr><tr><td class = "line-number" align="right">4</td><td class="line-code">	<span class="string">'products'</span> =&gt; <b>array</b>(</td></tr><tr><td class = "line-number" align="right">5</td><td class="line-code">		<b>array</b>(<span class="string">'name'</span> =&gt; <span class="string">'Banana'</span>, <span class="string">'price'</span> =&gt; 20.5),</td></tr><tr><td class = "line-number" align="right">6</td><td class="line-code">		<b>array</b>(<span class="string">'name'</span> =&gt; <span class="string">'Potato'</span>, <span class="string">'price'</span> =&gt; 10.8)</td></tr><tr><td class = "line-number" align="right">7</td><td class="line-code">	)</td></tr><tr><td class = "line-number" align="right">8</td><td class="line-code">));</td></tr></table></pre>
 	
 	
 	<strong>index.tpl</strong>
@@ -3591,6 +3592,87 @@ is the name of the file containing the dialect.</p>
 </div>
 
 					<div style="border-top: 1px dashed gray; width: 900px; margin-left: -150px;"></div>
+					<div class="section" id ="template-docs">
+	<h2>Template's documentation</h2>
+	<p>Div provides a functionality that create a documentation of your templates. The 
+	template's documentation is written in the comments with a specific syntax, similar 
+	to some programming languages. In each comment's line, the parser recognizes the 
+	documentation's properties and their values . The documentation's properties begin 
+	with @. See the example.</p>
+	<p>Now, a specific or restricted list of properties not exists. All the properties that 
+	you want to write in the comments will be saved by the parser. After parsing, getDocs 
+	returns the saved documentation's properties. With this information and a template, you
+	can build the documentation that you want.</p>
+	<p>Now, don't invent the wheel. Use getDocsReadable method and obtain a readable 
+	documentation based on the saved properties and a template provided by Div. You can 
+	specify a custom template.</p>
+	<p>Important, the template given by Div if it is prepared to recognize certain 
+	properties that are listed now:</p>
+	<table class="table">
+		<tr><th>Variable/property</th><th>Description</th></tr>
+		<tr class="even"><td valign="top">title</td><td>Documentation's title. This variable can be passed to the 
+			method with $items parameter. For example:<br/>
+			<pre>echo div::getDocsReadable(null, array('title' => 'My docs'));</pre>
+		</td></tr>
+		<tr class="odd"><td valign="top">name</td><td>Template's name</td></tr>
+		<tr class="even"><td valign="top">description</td><td valign="top">Description of the template in one line</td></tr>
+		<tr class="odd"><td valign="top">version</td><td valign="top">Version of the template</td></tr>
+		<tr class="even"><td valign="top">author</td><td valign="top">Author</td></tr>
+		<tr class="odd"><td valign="top">update</td><td valign="top">Date of last update</td></tr>
+		<tr class="even"><td valign="top">vars</td><td valign="top">List of the template's variables. 
+		The fourth part can contain several spaces, but the three first not, because Div considers them 
+		as words. Remember that this is specifically for the documentation template that Div provides. 
+		You can build your own documentation template with defined variables by your work team: <br/>
+		<ol>
+			<li>optional/required</li>
+			<li>data type</li>
+			<li>variable's name</li>
+			<li>variable's description</li>
+		</ol>
+		For example: <br/>
+		<pre>
+&lt;!--{  
+...
+@vars required string title Blog's title 
+      optional string body Blog's body
+...			
+}--&gt;
+			</pre>
+		</td></tr>
+		<tr class="odd"><td valign="top">include</td><td>The list of included templates. The parser will add 
+		all includes automatically. Also you can specify it, for example, when the include tag use a variable 
+		and not the template's specific path.</td></tr>
+		<tr class="even"><td valign="top">example</td><td>The example of how to use this template</td></tr> 
+	</table>
+	<h4>Syntax in templates</h4>
+	
+		
+		
+		
+
+
+
+
+
+
+<pre class="code div-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">&lt;--{ </td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">	... unsaved content here ....</td></tr><tr><td class = "line-number" align="right">4</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">5</td><td class="line-code">	@fist_saved_property value</td></tr><tr><td class = "line-number" align="right">6</td><td class="line-code">	@other_property value</td></tr><tr><td class = "line-number" align="right">7</td><td class="line-code">	@other_property value</td></tr><tr><td class = "line-number" align="right">8</td><td class="line-code">	@other_property value</td></tr><tr><td class = "line-number" align="right">9</td><td class="line-code">	@multiline_property: line1</td></tr><tr><td class = "line-number" align="right">10</td><td class="line-code">	                     line2</td></tr><tr><td class = "line-number" align="right">11</td><td class="line-code">	                     line3</td></tr><tr><td class = "line-number" align="right">12</td><td class="line-code">	@other_multiline_property: </td></tr><tr><td class = "line-number" align="right">13</td><td class="line-code">	line1</td></tr><tr><td class = "line-number" align="right">14</td><td class="line-code">	line2</td></tr><tr><td class = "line-number" align="right">15</td><td class="line-code">	line3	</td></tr><tr><td class = "line-number" align="right">16</td><td class="line-code">	...</td></tr><tr><td class = "line-number" align="right">17</td><td class="line-code">	</td></tr><tr><td class = "line-number" align="right">18</td><td class="line-code">}--&gt;</td></tr></table></pre>
+	
+	<h4>Example</h4>
+	
+		
+		
+		
+
+
+
+
+
+
+<pre class="code div-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">&lt;--{ </td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">	The next comments are the documentation of this template</td></tr><tr><td class = "line-number" align="right">4</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">5</td><td class="line-code">	@name My template</td></tr><tr><td class = "line-number" align="right">6</td><td class="line-code">	@description My first template with documentation</td></tr><tr><td class = "line-number" align="right">7</td><td class="line-code">	@author Me <me@domain.com></td></tr><tr><td class = "line-number" align="right">8</td><td class="line-code">	@vars: required string title</td></tr><tr><td class = "line-number" align="right">9</td><td class="line-code">	       optional string body </td></tr><tr><td class = "line-number" align="right">10</td><td class="line-code">	</td></tr><tr><td class = "line-number" align="right">11</td><td class="line-code">	@example:</td></tr><tr><td class = "line-number" align="right">12</td><td class="line-code">	{= title: "My first blog" =}</td></tr><tr><td class = "line-number" align="right">13</td><td class="line-code">	{= body: "This is my first blog" =}</td></tr><tr><td class = "line-number" align="right">14</td><td class="line-code">	{% blog.tpl %}</td></tr><tr><td class = "line-number" align="right">15</td><td class="line-code">	</td></tr><tr><td class = "line-number" align="right">16</td><td class="line-code">}--&gt;</td></tr></table></pre>
+	
+</p>
+</div>
+					<div style="border-top: 1px dashed gray; width: 900px; margin-left: -150px;"></div>
 					
 					
 
@@ -4724,7 +4806,8 @@ is the name of the file containing the dialect.</p>
 		<div style="background:  #656565; text-align: center; color: white; margin-top: 20px; font-size: 15px;width: 100%; height: 150px; border-top: 10px dashed white;">
 		<br/>
 			<p style="font-size: 11px; align:center; margin-left: 20%;">	
-			This documentation was compiled by Div at 2013-02-28 09:13:45<br/>
+			This documentation was compiled by Div at 2013-06-07 08:25:46 
+ <br/>
 			Written by Rafael Rodr&iacute;guez <a class = "white" href="mailto:rafa@pragres.com">&lt;rafa@pragres.com&gt;</a><br/>
 			</p>
 		<br/>Powered by Div</div>

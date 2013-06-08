@@ -1,5 +1,5 @@
 ﻿---------------------------------------
-[[]] Div PHP Template Engine 4.0
+[[]] Div PHP Template Engine 4.1
 ---------------------------------------
 by Rafa Rodríguez (rafa@pragres.com)
 
@@ -62,9 +62,9 @@ create a minimum of highly descriptive syntax, avoid a cache system, improve
 the algorithms, reuse the knowledge, write mechanisms and extend!.
 	
 Possibilities for the designer? The designer carries out its work in text 
-files and he can use different tags. Div does not provide for the design 
-obtrusive code. All that is programmed in the templates has a single goal: 
-design.
+files and then the designer can use different tags. Div does not provide for 
+the design obtrusive code. All that is programmed in the templates has a single 
+goal: design.
 
 Possibilities for the programmer? The programmer creates an instance of div 
 class, specifying in its constructor, the template	created by the designer 

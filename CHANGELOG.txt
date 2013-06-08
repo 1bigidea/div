@@ -1,4 +1,10 @@
 ----------------------------
+June 02, 2013
+----------------------------
+- Fix/improve the translator
+- Fix/improve the parser 
+
+----------------------------
 June 01, 2013
 ----------------------------
 - Improve the parser of ignored parts
@@ -8,7 +14,7 @@ document the template. The documentation's parts have @ as prefix. For example:
 
 	<!--{ 
 	    @icon [[]]
-		@what-is-this Div PHP Template Engine Component
+		@type Div PHP Template Engine Component
 		@name Simple Combobox 
 		@autor Rafael Rodriguez Ramirez <rafa@pragres.com, rrodriguezramirez@gmail.com>
 		@version 1.0
