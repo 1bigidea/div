@@ -1,5 +1,5 @@
 ﻿---------------------------------------
-[[]] Div PHP Template Engine 4.1
+[[]] Div PHP Template Engine 4.2
 ---------------------------------------
 by Rafa Rodríguez (rafa@pragres.com)
 
