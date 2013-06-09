@@ -1,4 +1,11 @@
 ----------------------------
+June 08, 2013
+----------------------------
+- Improve template's documentation
+- Release new version 1.1 of Div Dialect Creator
+- Release the version 4.2
+
+----------------------------
 June 02, 2013
 ----------------------------
 - Fix/improve the translator

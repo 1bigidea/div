@@ -99,9 +99,9 @@ define('DIV_ERROR_FATAL', 'FATAL');
 define('DIV_METHOD_NOT_EXISTS', 'DIV_METHOD_NOT_EXISTS');
 define('DIV_UNICODE_ERROR', -1);
 
-define('DIV_MOMENT_BEFORE_PARSE', 'DIV_MOMENT_BEFORE_PARSE');
-define('DIV_MOMENT_AFTER_PARSE', 'DIV_MOMENT_AFTER_PARSE');
-define('DIV_MOMENT_AFTER_INCLUDE', 'DIV_MOMENT_AFTER_INCLUDE');
+define('DIV_MOMENT_BEFORE_PARSE',   'DIV_MOMENT_BEFORE_PARSE');
+define('DIV_MOMENT_AFTER_PARSE',    'DIV_MOMENT_AFTER_PARSE');
+define('DIV_MOMENT_AFTER_INCLUDE',  'DIV_MOMENT_AFTER_INCLUDE');
 define('DIV_MOMENT_AFTER_REPLACE' , 'DIV_MOMENT_AFTER_REPLACE');
 
 //------------------------------------- D E F A U L T   D I A L E C T --------------------------------------//
@@ -420,6 +420,7 @@ class div{
 	private static $__allowed_methods = null;             // list of allowed class's methods
 	private static $__sub_parsers = array();              // list of subparsers
 	private static $__docs = array();					  // template's documentation
+	private static $__docs_on = false;                    // on/off documentation
 
 	// Internals
 	private static $__version = '4.2';                    // current version of Div
@@ -2297,23 +2298,25 @@ class div{
 						$tpl_prop = $this->getTemplateProperties($c);
 						$c = $this->prepareDialect($c, $tpl_prop);
 
-						if (file_exists($this->__path) || file_exists(PACKAGES.$this->__path)){
-							$section = trim($this->__path);
-							$contained = trim($path);
+						if (self::$__docs_on){
+							if (file_exists($this->__path) || file_exists(PACKAGES.$this->__path)){
+								$section = trim($this->__path);
+								$contained = trim($path);
 
-							if (substr($section, 0, 2)=='./') $section = substr($this->__path, 2);
-							if (substr($contained, 0, 2)=='./') $contained = substr($path, 2);
+								if (substr($section, 0, 2)=='./') $section = substr($this->__path, 2);
+								if (substr($contained, 0, 2)=='./') $contained = substr($path, 2);
 
-							self::$__docs[$contained] = array();
-							if (!isset(self::$__docs[$section])) self::$__docs[$section] = array();
-							if (!isset(self::$__docs[$section]['include'])) self::$__docs[$section]['include'] = array();
-							self::$__docs[$section]['include'][$contained] = $contained;
+								self::$__docs[$contained] = array();
+								if (!isset(self::$__docs[$section])) self::$__docs[$section] = array();
+								if (!isset(self::$__docs[$section]['include'])) self::$__docs[$section]['include'] = array();
+								self::$__docs[$section]['include'][$contained] = $contained;
 
-							$engine = self::getAuxiliaryEngineClone($items);
-							$engine->__src = $c;
-							$engine->parseComments($path);
-							$c = $engine->__src;
-							unset($engine);
+								$engine = self::getAuxiliaryEngineClone($items);
+								$engine->__src = $c;
+								$engine->parseComments($path);
+								$c = $engine->__src;
+								unset($engine);
+							}
 						}
 
 					} else if (self::$__log_mode) $this->logger($c);
@@ -2401,17 +2404,19 @@ class div{
 				$engine = self::getAuxiliaryEngineClone($items);
 				$engine->__src = $c;
 
-				if (file_exists($this->__path) || file_exists(PACKAGES.$this->__path)){
-					$section = trim($this->__path);
-					$contained = trim($path);
+				if (self::$__docs_on){
+					if (file_exists($this->__path) || file_exists(PACKAGES.$this->__path)){
+						$section = trim($this->__path);
+						$contained = trim($path);
 
-					if (substr($section, 0, 2)=='./') $section = substr($this->__path, 2);
-					if (substr($contained, 0, 2)=='./') $contained = substr($path, 2);
+						if (substr($section, 0, 2)=='./') $section = substr($this->__path, 2);
+						if (substr($contained, 0, 2)=='./') $contained = substr($path, 2);
 
-					self::$__docs[$contained] = array();
-					if (!isset(self::$__docs[$section])) self::$__docs[$section] = array();
-					if (!isset(self::$__docs[$section]['preprocess'])) self::$__docs[$section]['include'] = array();
-					self::$__docs[$section]['preprocess'][] = $contained;
+						self::$__docs[$contained] = array();
+						if (!isset(self::$__docs[$section])) self::$__docs[$section] = array();
+						if (!isset(self::$__docs[$section]['preprocess'])) self::$__docs[$section]['include'] = array();
+						self::$__docs[$section]['preprocess'][] = $contained;
+					}
 				}
 
 				$engine->__path = $path;
@@ -2445,58 +2450,60 @@ class div{
 			$ranges = $this->getRanges(DIV_TAG_COMMENT_BEGIN, DIV_TAG_COMMENT_END, null, true);
 			if (count($ranges) < 1) break;
 
-			// Documentation
-			$subsrc = substr($this->__src, $ranges[0][0]+$lbegin, $ranges[0][1]-$ranges[0][0] - $lbegin);
-			$arr = explode("\n", $subsrc);
+			// Parse template's docs
+			if (self::$__docs_on){
+				$subsrc = substr($this->__src, $ranges[0][0]+$lbegin, $ranges[0][1]-$ranges[0][0] - $lbegin);
+				$arr = explode("\n", $subsrc);
 
-			$last_prop = '';
-			$last_tab = 0;
-			foreach($arr as $line){
-				$orig = $line;
-				$line = str_replace("\r\n","\n",$line);
-				$line = trim($line);
-				$line = str_replace("\t"," ",$line);
+				$last_prop = '';
+				$last_tab = 0;
+				foreach($arr as $line){
+					$orig = $line;
+					$line = str_replace("\r\n","\n",$line);
+					$line = trim($line);
+					$line = str_replace("\t"," ",$line);
 
-				if ($last_prop !== '') if (isset($orig[0]) && $line == '') $line = " ";
+					if ($last_prop !== '') if (isset($orig[0]) && $line == '') $line = " ";
 
-				if (isset($line[0])) {
-					if ($last_prop !== '') if ($line[0] !== '@') $line = '@'.$last_prop.': '.substr($orig,$last_tab);
-					if ($line[0] == '@'){
+					if (isset($line[0])) {
+						if ($last_prop !== '') if ($line[0] !== '@') $line = '@'.$last_prop.': '.substr($orig,$last_tab);
+						if ($line[0] == '@'){
 
-						$multiline = false;
+							$multiline = false;
 
-						$p = strpos($line," ");
-						if ($p !== false){
-							$prop = substr($line,1,$p-1);
-							$value = substr($line,$p);
-						} else {
-							$prop = substr($line,1);
-							$value = "";
-						}
-						$l = strlen($prop);
-
-						if ($prop[$l-1]==":") {
-							$multiline = true;
-							$prop = substr($prop,0,$l-1);
-						}
-
-						if (!isset(self::$__docs[$section])) self::$__docs[$section] = array();
-						if (isset(self::$__docs[$section][$prop]))	{
-							if (!is_array(self::$__docs[$section][$prop])) {
-								if (trim(self::$__docs[$section][$prop])!=='') self::$__docs[$section][$prop] = array(self::$__docs[$section][$prop]);
+							$p = strpos($line," ");
+							if ($p !== false){
+								$prop = substr($line,1,$p-1);
+								$value = substr($line,$p);
+							} else {
+								$prop = substr($line,1);
+								$value = "";
 							}
-							if (isset(self::$__docs[$section][$prop][0]) || (!isset(self::$__docs[$section][$prop][0]) && trim($value) !== '')) self::$__docs[$section][$prop][] = $value;
-						} else self::$__docs[$section][$prop] = $value;
+							$l = strlen($prop);
 
-						if ($multiline) $last_prop = $prop; else $last_prop = '';
+							if ($prop[$l-1]==":") {
+								$multiline = true;
+								$prop = substr($prop,0,$l-1);
+							}
 
-						$ppp = strpos($orig, '@'.$prop);
-						if ($ppp !== false) $last_tab = $ppp;
+							if (!isset(self::$__docs[$section])) self::$__docs[$section] = array();
+							if (isset(self::$__docs[$section][$prop]))	{
+								if (!is_array(self::$__docs[$section][$prop])) {
+									if (trim(self::$__docs[$section][$prop])!=='') self::$__docs[$section][$prop] = array(self::$__docs[$section][$prop]);
+								}
+								if (isset(self::$__docs[$section][$prop][0]) || (!isset(self::$__docs[$section][$prop][0]) && trim($value) !== '')) self::$__docs[$section][$prop][] = $value;
+							} else self::$__docs[$section][$prop] = $value;
 
+							if ($multiline) $last_prop = $prop; else $last_prop = '';
+
+							$ppp = strpos($orig, '@'.$prop);
+							if ($ppp !== false) $last_tab = $ppp;
+
+						}
 					}
 				}
 			}
-
+				
 			// Extract
 			$this->__src = substr($this->__src, 0, $ranges[0][0]) . substr($this->__src, $ranges[0][1] + strlen(DIV_TAG_COMMENT_END));
 		}
@@ -4195,12 +4202,14 @@ class div{
 
 		if ($update) $this->__src = $src;
 
-		$section = trim($this->__path);
-		if ($section !==''){
-			if (substr($section, 0, 2)=='./') $section = substr($this->__path, 2);
-			if ($section!=='') self::$__docs[$section]['properties'] = $properties;
+		if (self::$__docs_on){
+			$section = trim($this->__path);
+			if ($section !==''){
+				if (substr($section, 0, 2)=='./') $section = substr($this->__path, 2);
+				if ($section!=='') self::$__docs[$section]['properties'] = $properties;
+			}
 		}
-
+		
 		return $properties;
 	}
 
@@ -5373,10 +5382,38 @@ class div{
 
 	//-------------------------------- Functions ------------------------------------- //
 
+	/**
+	 * Enable documentation
+	 *
+	 */
+	final static function docsOn(){
+		self::$__docs_on = true;
+	}
+
+	/**
+	 * Disable documentation
+	 *
+	 */
+	final static function docsOff(){
+		self::$__docs_off = false;
+	}
+
+	/**
+	 * Get documentation's data
+	 *
+	 * @return array
+	 */
 	final static function getDocs(){
 		return self::$__docs;
 	}
 
+	/**
+	 * Get a redeable documentation
+	 *
+	 * @param string $tpl
+	 * @param array $items
+	 * @return string
+	 */
 	final static function getDocsReadable($tpl = null, $items = null){
 
 		$docs = self::$__docs;
@@ -5388,6 +5425,7 @@ class div{
 		foreach($keys as $key) $docsx[$key] = $docs[$key];
 
 		if (is_null($items)) $items = array('title' => "Templates's documentation");
+		elseif (is_object($items)) $items = get_object_vars($items);
 
 		$items = array_merge($items, array('docs' => $docsx));
 

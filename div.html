@@ -287,9 +287,9 @@ ul.subsections li{
 <a href ="#conditional-parts">Conditional parts</a><br/>
 <a href ="#conditions">Conditions</a><br/>
 <a href ="#template-vars">Template vars</a><br/>
-</td><td valign="top">
 <a href ="#oop">Object Oriented Programming</a><br/>
 <ul class="subsections"><li><a href="#intelligent-data">The content as an "object"</a></li><li><a href="#hooks">The hooks</a></li><li><a href="#tostring">The __toString magic method</a></li></ul>
+</td><td valign="top">
 <a href ="#default-replacements">Default replacements</a><br/>
 <a href ="#global-vars">Global vars</a><br/>
 <a href ="#strips">Strip/clean the resulting code</a><br/>
@@ -303,7 +303,7 @@ ul.subsections li{
 <a href ="#locations">Locations</a><br/>
 <a href ="#subparsers">Sub-parsers <span style="color: yellow;font-size:10px;font-weight: bold;"><sup>updated!</sup></span></a><br/>
 <a href ="#macros">Macros</a><br/>
-<a href ="#dialects">Custom "dialects" <span style="color: yellow;font-size:10px;font-weight: bold;"><sup>updated!</sup></span></a><br/>
+<a href ="#dialects">Custom "dialects"</a><br/>
 <a href ="#template-properties">Template's properties <span style="color: yellow;font-size:10px;font-weight: bold;"><sup>new!</sup></span></a><br/>
 <a href ="#template-docs">Template's documentation <span style="color: yellow;font-size:10px;font-weight: bold;"><sup>new!</sup></span></a><br/>
 </td></tr></table>
@@ -845,7 +845,7 @@ ul.subsections li{
 
 
 
-<pre class="code out-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">Hello</td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code">Peter</td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">	Today is 2013-06-07</td></tr></table></pre>
+<pre class="code out-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">Hello</td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code">Peter</td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">	Today is 2013-06-08</td></tr></table></pre>
 	 
 	</td></tr></table>
 	
@@ -3658,6 +3658,7 @@ is the name of the file containing the dialect.</p>
 <pre class="code div-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">&lt;--{ </td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">	... unsaved content here ....</td></tr><tr><td class = "line-number" align="right">4</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">5</td><td class="line-code">	@fist_saved_property value</td></tr><tr><td class = "line-number" align="right">6</td><td class="line-code">	@other_property value</td></tr><tr><td class = "line-number" align="right">7</td><td class="line-code">	@other_property value</td></tr><tr><td class = "line-number" align="right">8</td><td class="line-code">	@other_property value</td></tr><tr><td class = "line-number" align="right">9</td><td class="line-code">	@multiline_property: line1</td></tr><tr><td class = "line-number" align="right">10</td><td class="line-code">	                     line2</td></tr><tr><td class = "line-number" align="right">11</td><td class="line-code">	                     line3</td></tr><tr><td class = "line-number" align="right">12</td><td class="line-code">	@other_multiline_property: </td></tr><tr><td class = "line-number" align="right">13</td><td class="line-code">	line1</td></tr><tr><td class = "line-number" align="right">14</td><td class="line-code">	line2</td></tr><tr><td class = "line-number" align="right">15</td><td class="line-code">	line3	</td></tr><tr><td class = "line-number" align="right">16</td><td class="line-code">	...</td></tr><tr><td class = "line-number" align="right">17</td><td class="line-code">	</td></tr><tr><td class = "line-number" align="right">18</td><td class="line-code">}--&gt;</td></tr></table></pre>
 	
 	<h4>Example</h4>
+	<b>index.tpl</b><br/>
 	
 		
 		
@@ -3669,6 +3670,19 @@ is the name of the file containing the dialect.</p>
 
 
 <pre class="code div-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">&lt;--{ </td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">	The next comments are the documentation of this template</td></tr><tr><td class = "line-number" align="right">4</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">5</td><td class="line-code">	@name My template</td></tr><tr><td class = "line-number" align="right">6</td><td class="line-code">	@description My first template with documentation</td></tr><tr><td class = "line-number" align="right">7</td><td class="line-code">	@author Me <me@domain.com></td></tr><tr><td class = "line-number" align="right">8</td><td class="line-code">	@vars: required string title</td></tr><tr><td class = "line-number" align="right">9</td><td class="line-code">	       optional string body </td></tr><tr><td class = "line-number" align="right">10</td><td class="line-code">	</td></tr><tr><td class = "line-number" align="right">11</td><td class="line-code">	@example:</td></tr><tr><td class = "line-number" align="right">12</td><td class="line-code">	{= title: "My first blog" =}</td></tr><tr><td class = "line-number" align="right">13</td><td class="line-code">	{= body: "This is my first blog" =}</td></tr><tr><td class = "line-number" align="right">14</td><td class="line-code">	{% blog.tpl %}</td></tr><tr><td class = "line-number" align="right">15</td><td class="line-code">	</td></tr><tr><td class = "line-number" align="right">16</td><td class="line-code">}--&gt;</td></tr></table></pre>
+	
+	<b>index.php</b>
+	
+		
+		
+		
+
+
+
+
+
+
+<pre class="code php-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code"><span class="php-open-tag">&lt;?php</span></td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code"><b>include</b> <span class="string">'div.php'</span>;</td></tr><tr><td class = "line-number" align="right">4</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">5</td><td class="line-code">div::docsOn();</td></tr><tr><td class = "line-number" align="right">6</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">7</td><td class="line-code">$tpl = <b>new</b> div(<span class="string">'index.tpl'</span>);</td></tr><tr><td class = "line-number" align="right">8</td><td class="line-code">$tpl-&gt;parse();</td></tr><tr><td class = "line-number" align="right">9</td><td class="line-code"></td></tr><tr><td class = "line-number" align="right">10</td><td class="line-code"><b>echo</b> $tpl-&gt;getDocsReadable();</td></tr></table></pre>
 	
 </p>
 </div>
@@ -4806,7 +4820,7 @@ is the name of the file containing the dialect.</p>
 		<div style="background:  #656565; text-align: center; color: white; margin-top: 20px; font-size: 15px;width: 100%; height: 150px; border-top: 10px dashed white;">
 		<br/>
 			<p style="font-size: 11px; align:center; margin-left: 20%;">	
-			This documentation was compiled by Div at 2013-06-07 08:25:46 
+			This documentation was compiled by Div at 2013-06-08 10:30:54 
  <br/>
 			Written by Rafael Rodr&iacute;guez <a class = "white" href="mailto:rafa@pragres.com">&lt;rafa@pragres.com&gt;</a><br/>
 			</p>
@@ -4819,8 +4833,8 @@ is the name of the file containing the dialect.</p>
 		<div style="position: absolute; top: 0px; left: 15%; border-left: 1px dashed white; height: 500px;"></div>
 		<div style="position: absolute; top: 0px; right: 15%; border-left: 1px dashed white; height: 500px;"></div>
 		<div style="position: absolute; top: 0px; right: 15%; border-left: 1px dashed white; height: 500px;"></div>
-		<div style="position: absolute; top: 500px; right: 15%; border-left: 1px dashed gray; height: 66350px"></div>
-		<div style="position: absolute; top: 500px; left: 15%; border-left: 1px dashed gray; height: 66350px"></div>
+		<div style="position: absolute; top: 500px; right: 15%; border-left: 1px dashed gray; height: 68550px;"></div>
+		<div style="position: absolute; top: 500px; left: 15%; border-left: 1px dashed gray; height: 68550px;"></div>
 		<div style="position: absolute; top: 600px; left: 0px; border-top: 1px dashed gray; width: 100%;"></div>
 		<div style="position: absolute; top: 600px; left: 10%; border-top: 1px solid black; width: 200px;"></div>
 		<div style="position: absolute; top: 600px; right: 10%; border-top: 1px solid black; width: 200px;"></div>
