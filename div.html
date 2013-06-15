@@ -3,7 +3,7 @@
 	<head>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 		<link rel="shortcut icon" href="div.ico" type="image/vnd.microsoft.icon" />
-		<title>Div PHP Template Engine 4.2</title>
+		<title>Div PHP Template Engine 4.3</title>
 		<style>
 			body {
 	font-family: Verdana;
@@ -241,7 +241,7 @@ ul.subsections li{
 			<tr>
 				<td style="padding-left: 20px;">
 					<span style="font-size: 10px; color: white;">
-						<h1><a class="white" href="http://divengine.com">[[]] Div PHP Template Engine 4.2</a></h1>
+						<h1><a class="white" href="http://divengine.com">[[]] Div PHP Template Engine 4.3</a></h1>
 						<hr/>
 					</span>
 				</td>
@@ -286,7 +286,7 @@ ul.subsections li{
 <a href ="#iterations">Iterations</a><br/>
 <a href ="#conditional-parts">Conditional parts</a><br/>
 <a href ="#conditions">Conditions</a><br/>
-<a href ="#template-vars">Template vars</a><br/>
+<a href ="#template-vars">Template's variables</a><br/>
 <a href ="#oop">Object Oriented Programming</a><br/>
 <ul class="subsections"><li><a href="#intelligent-data">The content as an "object"</a></li><li><a href="#hooks">The hooks</a></li><li><a href="#tostring">The __toString magic method</a></li></ul>
 </td><td valign="top">
@@ -845,7 +845,7 @@ ul.subsections li{
 
 
 
-<pre class="code out-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">Hello</td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code">Peter</td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">	Today is 2013-06-08</td></tr></table></pre>
+<pre class="code out-code"><table width="100%" cellspacing="0"><tr><td class = "line-number" align="right">1</td><td class="line-code">Hello</td></tr><tr><td class = "line-number" align="right">2</td><td class="line-code">Peter</td></tr><tr><td class = "line-number" align="right">3</td><td class="line-code">	Today is 2013-06-15</td></tr></table></pre>
 	 
 	</td></tr></table>
 	
@@ -1700,9 +1700,9 @@ ul.subsections li{
 </div>
 					<div style="border-top: 1px dashed gray; width: 900px; margin-left: -150px;"></div>
 					<div class="section" id ="template-vars">
-	<h2>Template vars</h2>
+	<h2>Template's variables</h2>
 	<ul>
-		<li><a href="#protected-template-vars">Protected template's vars</a></li>
+		<li><a href="#protected-template-vars">Protected template's variables</a></li>
 		<li><a href="#load-external-content">How to load the content of an external template into a variable?</a></li>
 	</ul>
 	<p>This feature is dedicated to designers. The designers can declare variables in the template and to use them for different reasons.</p>
@@ -1714,6 +1714,24 @@ ul.subsections li{
 		<li>A call to method of the current PHP class</li>
 		<li>The path of JSON file</li>
 	</ul>
+	<p><b>Important:</b>If the value is not valid JSON, it will be considered as 
+     a template and will be parsed before decoding. See the next sequence:</p>
+     
+     <pre class="code div-code">
+1. Value is not valid JSON: {= digits: [[:0,8:]{$value},[/]9] =}
+2. Value was parsed:        {= digits: [0,1,2,3,4,5,6,7,8,9] =}
+3. Now "digists" is an array.
+4. Replacement:             {$digits} &lt;!--{ OUTPUT "10" }--&gt;
+     </pre>
+     See the difference:
+     <pre  class="code div-code">
+1. Value is valid JSON:     {= digits: "[[:0,8:]{$value},[/]9]" =}
+2. Value was not parsed:    {= digits: "[[:0,8:]{$value},[/]9]" =}
+3. Now "digists" is an string.
+4. Replacement:             {$digits} &lt;!--{ OUTPUT "[0,1,2,3,4,5,6,7,8,9]" }--&gt;
+     </pre>
+     
+     
 	<h4>Syntax in templates</h4>
 	
 	
@@ -4820,7 +4838,7 @@ is the name of the file containing the dialect.</p>
 		<div style="background:  #656565; text-align: center; color: white; margin-top: 20px; font-size: 15px;width: 100%; height: 150px; border-top: 10px dashed white;">
 		<br/>
 			<p style="font-size: 11px; align:center; margin-left: 20%;">	
-			This documentation was compiled by Div at 2013-06-08 10:30:54 
+			This documentation was compiled by Div at 2013-06-15 01:32:29 
  <br/>
 			Written by Rafael Rodr&iacute;guez <a class = "white" href="mailto:rafa@pragres.com">&lt;rafa@pragres.com&gt;</a><br/>
 			</p>

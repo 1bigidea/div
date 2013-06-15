@@ -20,7 +20,7 @@
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
  *
  * @author Rafael Rodriguez Ramirez <rafa@pragres.com>
- * @version: 4.2
+ * @version: 4.3
  * @link http://divengine.com
  */
 
@@ -421,9 +421,10 @@ class div{
 	private static $__sub_parsers = array();              // list of subparsers
 	private static $__docs = array();					  // template's documentation
 	private static $__docs_on = false;                    // on/off documentation
+	private static $__includes_historial = array();       // includes's historial
 
 	// Internals
-	private static $__version = '4.2';                    // current version of Div
+	private static $__version = '4.3';                    // current version of Div
 	private static $__super_class = null;                 // name of the super class
 	private static $__parent_method_names = array();      // name of parent class's methods
 	private static $__method_names = null;                // name of current methods
@@ -449,7 +450,8 @@ class div{
 	private static $__last_id = 0;                       // last template id
 	private static $__remember = array();                // remember previous work
 	private static $__dont_remember_it = array();        // do not remember it work
-
+	private static $__errors = array();                  // errors historial
+	
 	/**
 	 * Constructor
 	 *
@@ -463,7 +465,7 @@ class div{
 		// Validate the current dialect
 		if (self::$__dialect_checked == false){
 			$r = self::isValidCurrentDialect();
-			if ($r !== true) self::error('Invalid dialect: '.$r, 'FATAL');
+			if ($r !== true) self::error('Current dialect is invalid: '.$r, DIV_ERROR_FATAL);
 			self::$__dialect_checked = true;
 		}
 
@@ -804,6 +806,9 @@ class div{
 	 * @return string
 	 */
 	final public function loadTemplate($path){
+		
+		if (self::$__log_mode === true) $this->logger("Loading the template: $path");
+		
 		$src = $path;
 		$l = strlen($this->__packages);
 		if (substr($path,0,$l) == $this->__packages) $path = substr($path,$l);
@@ -1017,7 +1022,7 @@ class div{
 				if (!isset($ranges[0]) && $ini !==false) {
 					if (self::$__log_mode) if (isset($this)) {
 						foreach($this->__items as $key => $value) if (strpos($tagini, $key) !== false) {
-							$this->logger('Unclosed tag '.$tagini. ' at '.$ini.' character','SYNTAX');
+							$this->logger('Unclosed tag '.$tagini. ' at '.$ini.' character', DIV_ERROR_WARNING);
 							break;
 						}
 					}
@@ -1043,7 +1048,7 @@ class div{
 	 * @param string $end_suffix
 	 * @param integer $after
 	 * @param integer $before
-	 * @return unknown
+	 * @return array
 	 */
 	final public function getBlockRanges($src = null, $begin_prefix = '{', $begin_suffix = '}', $end_prefix = '{/', $end_suffix = '}', $after = 0, $before = null, $onlyfirst = false){
 
@@ -1224,7 +1229,7 @@ class div{
 		if (is_array($value)) return count($value) > 0;
 		if (self::isString($value)) {
 			if (strtolower($value) == 'false' || $value == '0') return false;
-			if (strtolower($value) == 'true') return true;
+			if (strtolower($value) == 'true'  || $value == '1') return true;
 			return strlen(trim($value)) > 0;
 		}
 		if (is_numeric($value)) return $value > 0;
@@ -1353,13 +1358,17 @@ class div{
 					// Controlling injected vars
 					// _is_last _is_first _is_odd _is_even
 
-					$continue = false;
 					if (array_search($key, array("_is_last", "_is_first", "_is_odd", "_id_even")) !== false){
 						if ($this->isBlockInsideBlock(DIV_TAG_LOOP_BEGIN_PREFIX, DIV_TAG_LOOP_END_PREFIX, $ini, $fin)){
 							$pos = $fin + 1;
 							if (self::$__log_mode) $this->logger("Ignore the injected var inside another list block: $key..");
 							continue;
 						}
+					}
+
+					if ($this->searchPosAfterRange(DIV_TAG_TPLVAR_BEGIN, DIV_TAG_TPLVAR_END, $ini)){
+						$pos = $fin + 1;
+						continue;
 					}
 
 					$subsrc = substr($src, $ini + $l, $fin - ($ini + $l));
@@ -1480,7 +1489,7 @@ class div{
 			$l = strlen($tag_begin);
 			if (count($ranges) < 1) break;
 
-			if (self::$__log_mode) $this->logger("Parse submatch  $tag_begin");
+			if (self::$__log_mode) $this->logger("Parsing submatch  $tag_begin");
 
 			// User wrote ....
 			$r = substr($this->__src, $ranges[0][0] + $l, $ranges[0][1] - ($ranges[0][0] + $l));
@@ -1614,7 +1623,8 @@ class div{
 			else {$substr = substr($this->__src, 0, $p2); $p1=$p2;}
 
 			if (strpos($value, $prefix.DIV_TAG_MODIFIER_SIMPLE.$key.$suffix) !== false) {
-				$value = "[[]] ERROR: INFINITE LOOP DETECTED ON RECURSIVE REPLACEMENT $$key";
+				$value = str_replace($prefix.DIV_TAG_MODIFIER_SIMPLE.$key.$suffix,"",$value);
+				self::error("Was detected an infinite loop in recursive replacement of $$rk.", DIV_ERROR_WARNING);
 			}
 
 			$px = false;
@@ -1626,7 +1636,7 @@ class div{
 			if ($px !== false) {
 
 				$rcount = 0;
-				if (self::$__log_mode) $this->logger("Parse match: $key in '".substr($substr, 0, 50)."'");
+				if (self::$__log_mode) $this->logger("Parsing match: $key in '".substr($substr, 0, 50)."'");
 
 				$value = trim("$value");
 
@@ -2057,8 +2067,8 @@ class div{
 
 						// Save similar global design vars
 
+						$tempglobal = self::$__globals_design;
 						foreach($item as $kkk => $vvv) if (isset(self::$__globals_design[$kkk])){
-							$tempglobal[$kkk] = self::$__globals_design[$kkk];
 							unset(self::$__globals_design[$kkk]);
 						}
 
@@ -2175,7 +2185,7 @@ class div{
 	}
 
 	/**
-	 * Return the full path or relative path for include and preprocessed
+	 * Return the resolved path for include and preprocessed
 	 *
 	 * @param string $path
 	 * @return string
@@ -2190,15 +2200,29 @@ class div{
 		if (!self::fileExists($this->__packages.$path)){
 			if ($this->__path != ""){
 				if (self::fileExists($this->__path)){
-					$flds = explode("/", $this->__path);
-					array_pop($flds);
-					$folder = implode("/", $flds);
+					$folder = self::getFolderOf($this->__path);
 					if (self::fileExists($folder."/".$path.".".DIV_DEFAULT_TPL_FILE_EXT)) $path .= ".".DIV_DEFAULT_TPL_FILE_EXT;
-					return $folder."/".$path;
+					if (self::fileExists($folder."/".$path)) {
+						return $folder."/".$path;
+					}
 				}
 			}
 		}
-		return $this->__packages.$path;
+
+		// Resolving with the historial	...
+		$max = 0;
+		$return = $this->__packages.$path;
+		foreach(self::$__includes_historial as $ih){
+			$folder = self::getFolderOf($ih);
+			$fullpath = $folder."/".$path;
+
+			if (self::fileExists($fullpath.".".DIV_DEFAULT_TPL_FILE_EXT)) $fullpath .= ".".DIV_DEFAULT_TPL_FILE_EXT;
+			else if (self::fileExists($this->__packages.$fullpath.".".DIV_DEFAULT_TPL_FILE_EXT)) $fullpath .= ".".DIV_DEFAULT_TPL_FILE_EXT;
+
+			$similar = similar_text($ih, $fullpath);
+			if ((self::fileExists($fullpath) || self::fileExists($this->__packages.$fullpath)) && $similar >= $max) $return = $fullpath;
+		}
+		return $return;
 	}
 
 	/**
@@ -2248,8 +2272,7 @@ class div{
 			if (isset($this->__ignore[$key])) continue;
 
 			if (strpos($this->__src,  $prefix.$key.$suffix) !== false && self::isString($value)){
-				if (self::fileExists($this->__packages.$value.".".DIV_DEFAULT_TPL_FILE_EXT))
-				$value .= ".".DIV_DEFAULT_TPL_FILE_EXT;
+				if (self::fileExists($this->__packages.$value.".".DIV_DEFAULT_TPL_FILE_EXT)) $value .= ".".DIV_DEFAULT_TPL_FILE_EXT;
 				$this->__src = str_replace($prefix.$key.$suffix, $prefix.$value.$suffix, $this->__src);
 			}
 		}
@@ -2291,8 +2314,10 @@ class div{
 
 			if ($path != $this->__path && !self::detectRecursiveInclusion($exclusion, $path, $ini)){
 				if (self::fileExists($path)){
-					$c = "[[]] ERROR: TEMPLATE '$path' NOT FOUND OR IS NOT A TEMPLATE!";
+					$c = "";
 					if (!is_dir($path)){
+
+						self::$__includes_historial[] = $path;
 
 						$c = self::getFileContents($path);
 						$tpl_prop = $this->getTemplateProperties($c);
@@ -2318,8 +2343,9 @@ class div{
 								unset($engine);
 							}
 						}
-
-					} else if (self::$__log_mode) $this->logger($c);
+					} else {
+						self::error("Template '$path' not found or is not a template", DIV_ERROR_WARNING);
+					}
 
 					$lenc = strlen($c);
 
@@ -2339,8 +2365,8 @@ class div{
 					$this->__src = substr($this->__src,0,$ini) .$id. substr($this->__src, $fin + $l2);
 				}
 			} else {
-				$c = "[[]] ERROR: RECURSIVE INCLUSION OF TEMPLATE $path";
-				if (self::$__log_mode) $this->logger($c,'ERROR');
+				$c = '';
+				self::error("Recursive inclusion of template $path is not allowed", DIV_ERROR_WARNING);
 				$this->__src = substr($this->__src, 0, $ini). $c . substr($this->__src, $fin + $l2);
 			}
 		}
@@ -2420,8 +2446,10 @@ class div{
 				}
 
 				$engine->__path = $path;
+				self::$__includes_historial[] = $path;
 				$engine->parse(false);
 				$pre = $engine->__src;
+
 				$this->__src = substr($this->__src, 0, $ini). $pre . substr($this->__src, $fin + $l2);
 			} else {
 				$id = uniqid();
@@ -2503,7 +2531,7 @@ class div{
 					}
 				}
 			}
-				
+
 			// Extract
 			$this->__src = substr($this->__src, 0, $ranges[0][0]) . substr($this->__src, $ranges[0][1] + strlen(DIV_TAG_COMMENT_END));
 		}
@@ -2695,7 +2723,7 @@ class div{
 				if (isset($current[$part])){
 					if ($i < $c){
 						if ($part == "") $code .= '[]';
-						else $code .= '["'.$part.'"]';
+						else $code .= '[\''.addslashes($part).'\']';
 						$current = $current[$part];
 					} else {
 						if ($part == "") eval($code.'[] = $value;');
@@ -2711,33 +2739,33 @@ class div{
 						else {
 							eval($code.'[$part] = array();');
 							$current = array();
-							$code .= '["'.$part.'"]';
+							$code .= '[\''.addslashes($part).'\']';
 						}
 					} else {
 						if ($part == "") eval($code.'[] = $value;');
 						else eval($code.'[$part] = $value;');
 					}
 				}
-
-
 			} elseif (is_object($current)) {
-				if (isset($current->$part)){
-					if ($i < $c){
-						$code .= '->'.$part;
-						$current = $current->$part;
+				if (self::isValidVarName($part)) {
+					$part = str_replace('$','',$part);
+					if (isset($current->$part)){
+						if ($i < $c){
+							$code .= '->'.$part;
+							$current = $current->$part;
+						} else {
+							eval($code.'->$part = $value;');
+						}
 					} else {
-						eval($code.'->$part = $value;');
+						if ($i < $c){
+							eval($code.'->$part = new stdClass();');
+							$code .= '->'.$part;
+							$current =  new stdClass();
+						} else {
+							eval($code.'->$part = $value;');
+						}
 					}
-				} else {
-					if ($i < $c){
-						eval($code.'->$part = new stdClass();');
-						$code .= '->'.$part;
-						$current =  new stdClass();
-					} else {
-						eval($code.'->$part = $value;');
-					}
-				}
-
+				} else break;
 			}
 		}
 
@@ -2774,6 +2802,7 @@ class div{
 			if ($this->searchPosAfterRange(DIV_TAG_FORMULA_BEGIN, DIV_TAG_FORMULA_END, $ini)) {$pos = $ini + 1; continue;}
 			if ($this->searchInRanges($this->getConditionalRanges(false),$ini)) {$pos = $ini + 1; continue;}
 			if ($this->searchInCapsuleRanges($items,$ini)) {$pos = $ini + 1; continue;}
+			if ($this->searchInRanges($this->getRanges(DIV_TAG_CONDITIONS_BEGIN_PREFIX, DIV_TAG_CONDITIONS_END),$ini)) {$pos = $ini + 1; continue;}
 
 			$body = substr($this->__src, $ini + $l1, $fin - $ini - $l1);
 			$arr = explode(":", $body, 2);
@@ -2805,6 +2834,7 @@ class div{
 			$setup = false;
 
 			// Check protection
+
 			if ((!isset(self::$__globals_design[$var]) || (isset(self::$__globals_design[$var]) && !isset(self::$__globals_design_protected[$var])))){
 				$exp = trim($exp);
 				if (substr($exp,0,2) == "->") { // parsing a method
@@ -2819,18 +2849,20 @@ class div{
 					}
 				} else { // parsing a JSON code
 
-					$temp = uniqid();
-					$temp1 = uniqid();
-					$exp = str_replace(DIV_TAG_INCLUDE_BEGIN, $temp, $exp);
-					$exp = str_replace(DIV_TAG_PREPROCESSED_BEGIN, $temp1, $exp);
+					$json = self::jsonDecode($exp, self::cop($this->__memory, $items));
 
-					$engine = self::getAuxiliaryEngineClone($items);
-					$engine->__src = $exp;
-					$engine->parse(false);
-					$exp = $engine->__src;
-
-					$exp = str_replace($temp, DIV_TAG_INCLUDE_BEGIN, $exp);
-					$exp = str_replace($temp1, DIV_TAG_PREPROCESSED_BEGIN, $exp);
+					if (is_null(self::compact($json))){
+						$temp = uniqid();
+						$temp1 = uniqid();
+						$exp = str_replace(DIV_TAG_INCLUDE_BEGIN, $temp, $exp);
+						$exp = str_replace(DIV_TAG_PREPROCESSED_BEGIN, $temp1, $exp);
+						$engine = self::getAuxiliaryEngineClone($items);
+						$engine->__src = $exp;
+						$engine->parse(false);
+						$exp = $engine->__src;
+						$exp = str_replace($temp, DIV_TAG_INCLUDE_BEGIN, $exp);
+						$exp = str_replace($temp1, DIV_TAG_PREPROCESSED_BEGIN, $exp);
+					}
 
 					if (!self::issetVar($var, $items) || self::issetVar($var, self::$__globals_design)) {
 						if (self::fileExists($this->__packages.$exp) && !self::isDir($this->__packages.$exp)) {
@@ -2844,9 +2876,9 @@ class div{
 							if ($fgc != "") $exp = $fgc;
 						}
 
-						$_exp = substr($exp,0,1);
+						if (isset($exp[0])) $_exp = $exp[0]; else $_exp = '';
 
-						if (($_exp != '{' && $_exp != "[" && !is_numeric($_exp) && $_exp != '"')
+						if (($_exp != '{' && $_exp != "[" && !is_numeric($_exp) && $_exp != '"' && $_exp != "'")
 						|| (substr($exp, 0, strlen(DIV_TAG_INCLUDE_BEGIN))== DIV_TAG_INCLUDE_BEGIN
 						&& substr($exp, 0 - strlen(DIV_TAG_INCLUDE_END)) == DIV_TAG_INCLUDE_END)
 						|| (substr($exp, 0, strlen(DIV_TAG_PREPROCESSED_BEGIN))== DIV_TAG_PREPROCESSED_BEGIN
@@ -2854,7 +2886,7 @@ class div{
 							$exp = '"'.str_replace('"','\"',$exp).'"';
 						}
 
-						$value = self::jsonDecode($exp);
+						$value = self::jsonDecode($exp, self::cop($this->__memory, $items));
 
 						$remember['vars'] = array();
 						$vars = $value;
@@ -2912,9 +2944,9 @@ class div{
 
 			$body = substr($this->__src, $ini + $l1, $fin - $ini - $l1);
 
-			$arr = self::jsonDecode($body);
+			$arr = self::jsonDecode($body, self::cop($this->__memory, $items));
 
-			if (!isset($arr[0]) || !isset($arr[1])) self::error("Parse error on <b>default values</b>: ".substr($body,0,80)."... is not a correct JSON", DIV_ERROR_FATAL);
+			if (!isset($arr[0]) || !isset($arr[1])) self::error("Was detected an invalid JSON in default values: ".substr($body,0,80)."...", DIV_ERROR_FATAL);
 
 			if (isset($arr[2])){
 				// Default by var
@@ -2928,10 +2960,10 @@ class div{
 				$replace = $arr[1];
 			}
 
-			if (self::fileExists($this->__packages.$replace) && !self::isDir($this->__packages.$search)) $replace = self::jsonDecode(self::getFileContents($this->__packages.$replace));
-			if (self::fileExists($this->__packages.$replace.".".DIV_DEFAULT_DATA_FILE_EXT) && !self::isDir($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT)) $replace = self::jsonDecode(self::getFileContents($this->__packages.$replace.".".DIV_DEFAULT_DATA_FILE_EXT));
-			if (self::fileExists($this->__packages.$search) && !self::isDir($this->__packages.$search)) $search = self::jsonDecode(self::getFileContents($this->__packages.$search));
-			if (self::fileExists($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT) && !self::isDir($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT)) $search = self::jsonDecode(self::getFileContents($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT));
+			if (self::fileExists($this->__packages.$replace) && !self::isDir($this->__packages.$search)) $replace = self::jsonDecode(self::getFileContents($this->__packages.$replace),self::cop($this->__memory, $items));
+			if (self::fileExists($this->__packages.$replace.".".DIV_DEFAULT_DATA_FILE_EXT) && !self::isDir($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT)) $replace = self::jsonDecode(self::getFileContents($this->__packages.$replace.".".DIV_DEFAULT_DATA_FILE_EXT),self::cop($this->__memory, $items));
+			if (self::fileExists($this->__packages.$search) && !self::isDir($this->__packages.$search)) $search = self::jsonDecode(self::getFileContents($this->__packages.$search),self::cop($this->__memory, $items));
+			if (self::fileExists($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT) && !self::isDir($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT)) $search = self::jsonDecode(self::getFileContents($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT),self::cop($this->__memory, $items));
 
 			if (is_null($var)){
 				self::setDefault($search, $replace);
@@ -3612,6 +3644,7 @@ class div{
 			}
 
 			if (is_scalar($value)) $value = array("value" => $value);
+
 			$value = array_merge($items, $value);
 
 			$tempglobal = array(); // priority to item's properties
@@ -3707,7 +3740,7 @@ class div{
 
 					return $r;
 				} else {
-					$params = self::jsonDecode($params);
+					$params = self::jsonDecode($params, self::cop($this->__memory, $items));
 					return $obj->$method($params);
 				}
 			}
@@ -3878,6 +3911,8 @@ class div{
 			$code = $function;
 			if (method_exists($this, $function)) $code = '$this->'.$function;
 
+			if (self::$__log_mode) $this->logger("Parsing the subparser $parser ...");
+			
 			$ignore = false;
 			$p = 0;
 			while(true){
@@ -3926,6 +3961,8 @@ class div{
 	 * @return mixed
 	 */
 	final public function checkLogicalOrder($ini = 0, $var = "", $chkloops = false, $chkmatchs = false, $chkformats = false, $chkdata = false){
+
+		if (self::$__log_mode) $this->logger("Checking logical order at $ini...");
 
 		if ($chkdata){
 			$rang = $this->getRanges(DIV_TAG_TPLVAR_BEGIN, DIV_TAG_TPLVAR_END, null, true);
@@ -4063,8 +4100,7 @@ class div{
 			ob_end_clean();
 
 			if ($this->__temp['invalid_macro']) {
-				if (self::$__log_mode) $this->logger('Invalid macro \n\n '.$this->__temp['code'],'ERROR ');
-				else self::error("Invalid macro ".highlight_string("\n\n".$this->__temp['code'], true));
+				self::error("Invalid macro: \n\n".$this->__temp['code']);
 			}
 
 			$this->__temp['p'] = $this->__temp['ini'] + 1;
@@ -4083,6 +4119,9 @@ class div{
 	 * @param integer $checksum
 	 */
 	final private function makeItAgain($checksum, &$items){
+		
+		if (self::$__log_mode === true) $this->logger("Making again some remembered tasks...");
+		
 		$simple = DIV_TAG_REPLACEMENT_PREFIX.DIV_TAG_MODIFIER_SIMPLE;
 
 		foreach(self::$__remember[$checksum] as $params){
@@ -4187,7 +4226,7 @@ class div{
 							if (!isset($properties[$var])){
 								array_shift($arr);
 								$value = implode('=', $arr);
-								$vvalue = self::jsonDecode($value);
+								$vvalue = self::jsonDecode($value, $this->__memory);
 								if (!is_null($vvalue)) $value = $vvalue; else $value = trim($value);
 								$properties[$var]=$value;
 								$line = '';
@@ -4209,7 +4248,7 @@ class div{
 				if ($section!=='') self::$__docs[$section]['properties'] = $properties;
 			}
 		}
-		
+
 		return $properties;
 	}
 
@@ -4235,6 +4274,8 @@ class div{
 		if (isset($properties['DIALECT'])){
 			$f = trim($properties['DIALECT']);
 
+			if (self::$__log_mode === true) $this->logger("Preparing the dialect...");
+			
 			if (self::fileExists($this->__packages.$f) && $f !== '') $json = file_get_contents($this->__packages.$f);
 			else $json = DIV_DEFAULT_DIALECT;
 
@@ -4326,8 +4367,8 @@ class div{
 
 					if (self::$__log_mode === true) {
 						$this->logger('Template | size: '.strlen($this->__src));
-						if (isset($this->__src[50])) $this->logger('Template: '.str_replace("\n"," ",substr($this->__src,0,50)."...".substr($this->__src,strlen($this->__src)-50)));
-						else $this->logger('Template: '.$this->__src);
+						if (isset($this->__src[100])) $this->logger('Template [checksum='.$checksum.']:'.htmlentities(str_replace("\n"," ",substr($this->__src,0,100))."...".substr($this->__src,strlen($this->__src) - 100)));
+						else $this->logger('Template [checksum='.$checksum.']: '.htmlentities($this->__src));
 					}
 
 					$cycles1++;
@@ -4448,19 +4489,19 @@ class div{
 				if (strpos($this->__src, DIV_TAG_MULTI_REPLACEMENT_END_SUFFIX) !== false)
 				$this->parseMultiReplace($items);
 
+				// Searching orphan parts (conditions)
+				if (strpos($this->__src,  DIV_TAG_CONDITIONS_BEGIN_PREFIX)!== false) $this->parseConditions($items, true);
+
 			} while ($checksum != crc32($this->__src));
 
-			if (strpos($this->__src,  DIV_TAG_IGNORE_BEGIN) !== false) $this->parseIgnore();
-			if (strpos($this->__src,  DIV_TAG_COMMENT_BEGIN) !== false) $this->parseComments();
-			if (strpos($this->__src,  DIV_TAG_FRIENDLY_BEGIN) !== false) $this->parseFriendly();
-
-			// Searching orphan parts
+			// Searching orphan parts (conditionals)
 			if (strpos($this->__src,  DIV_TAG_CONDITIONAL_TRUE_BEGIN_PREFIX) !== false
 			|| strpos($this->__src,  DIV_TAG_CONDITIONAL_FALSE_BEGIN_PREFIX) !== false)
 			$this->parseOrphanParts();
 
-			// More orphan parts
-			if (strpos($this->__src,  DIV_TAG_CONDITIONS_BEGIN_PREFIX)!== false) $this->parseConditions($items, true);
+			if (strpos($this->__src,  DIV_TAG_IGNORE_BEGIN) !== false) $this->parseIgnore();
+			if (strpos($this->__src,  DIV_TAG_COMMENT_BEGIN) !== false) $this->parseComments();
+			if (strpos($this->__src,  DIV_TAG_FRIENDLY_BEGIN) !== false) $this->parseFriendly();
 
 			// Locations
 			if (strpos($this->__src,  DIV_TAG_LOCATION_CONTENT_BEGIN_PREFIX) !== false)
@@ -4519,7 +4560,7 @@ class div{
 
 		$time_end = microtime(true);
 
-		if (self::$__log_mode) $this->logger("Parse duration: ".number_format($time_end - $time_start, 5)." secs");
+		if (self::$__log_mode) $this->logger("Parser duration: ".number_format($time_end - $time_start, 5)." secs");
 
 		self::$__parse_duration = $time_end - $time_start;
 		self::$__parse_level--;
@@ -4752,6 +4793,8 @@ class div{
 	 */
 	final public function translateFrom($dialectFrom, $src = null, $items = null){
 
+		if (self::$__log_mode === true) $this->logger("Translating to current dialect...");
+		
 		$update = false;
 		if (is_null($src)) {
 			$src = &$this->__src;
@@ -5439,6 +5482,41 @@ class div{
 	}
 
 	/**
+	 * Clear all empty/null values and return a compact mixed
+	 *
+	 * @param mixed $mixed
+	 * @return mixed
+	 */
+	final static function compact($mixed){
+
+		if (empty($mixed)) return null;
+		if (is_null($mixed)) return null;
+		if (is_scalar($mixed)) if ("$mixed"=='') return null;
+
+		if (is_object($mixed)){
+			$vars = get_object_vars($mixed);
+			foreach($vars as $var =>$value){
+				$value = self::compact($value);
+				if (is_null($value)) unset($mixed->$var);
+			}
+			$vars = get_object_vars($mixed);
+			if (count($vars)<1) return null;
+		}
+
+		if (is_array($mixed)){
+			$arr = array();
+			foreach($mixed as $var=>$value){
+				$value = self::compact($value);
+				if (!is_null($value)) $arr[$var] = $value;
+			}
+			if (count($arr)<1) return null;
+			$mixed = $arr;
+		}
+
+		return $mixed;
+	}
+
+	/**
 	 * Convert any value to string (with Div method)
 	 *
 	 * @param mixed $value
@@ -5574,8 +5652,15 @@ class div{
 	 * @param string $str
 	 * @return mixed
 	 */
-	final static function jsonDecode($str){
+	final static function jsonDecode($str, $items = array()){
 		$str = trim(preg_replace(array('#^\s*//(.+)$#m','#^\s*/\*(.+)\*/#Us', '#/\*(.+)\*/\s*$#Us'), '', $str));
+
+		// Syntax specific for div
+		if ($str[0] == '$') {
+			$str = substr($str,1);
+			$r = self::getVarValue($str, $items);
+			return $r;
+		}
 
 		switch (strtolower($str)) {
 			case 'true': return true;
@@ -5651,18 +5736,18 @@ class div{
 							array_push($stk, array('what' => 1, 'where' => ($c + 1), 'delim' => false));
 
 							if (reset($stk) == 3) {
-								array_push($arr, self::jsonDecode($slice));
+								array_push($arr, self::jsonDecode($slice,$items));
 
 							} elseif (reset($stk) == 4) {
 								$parts = array();
 								if (preg_match('/^\s*(["\'].*[^\\\]["\'])\s*:\s*(\S.*),?$/Uis', $slice, $parts)) {
-									$key = self::jsonDecode($parts[1]);
-									$val = self::jsonDecode($parts[2]);
+									$key = self::jsonDecode($parts[1],$items);
+									$val = self::jsonDecode($parts[2],$items);
 
 									if (true & 16) $obj[$key] = $val; else 	$obj->$key = $val;
 								} elseif (preg_match('/^\s*(\w+)\s*:\s*(\S.*),?$/Uis', $slice, $parts)) {
 									$key = $parts[1];
-									$val = self::jsonDecode($parts[2]);
+									$val = self::jsonDecode($parts[2],$items);
 
 									if (true & 16) {
 										$obj[$key] = $val;
@@ -5791,7 +5876,7 @@ class div{
 		while(strpos($html, "\n\n") !== false) $html = str_replace("\n\n","\n", $html);
 		while(strpos($html, '  ') !== false) $html = str_replace('  ',' ', $html);
 		$html = trim($html);
-		$html = wordwrap($html,$width,"\n");
+		if (!is_null($width) && $width !== 0) $html = wordwrap($html,$width,"\n");
 		return $html;
 	}
 
@@ -5897,6 +5982,19 @@ class div{
 		return file_get_contents($filename);
 	}
 
+	/**
+	 * Get folder of path/file
+	 *
+	 * @param string $filename
+	 * @return string
+	 */
+	final static function getFolderOf($filename){
+		if (is_dir($filename)) return $filename;
+		$p = strrpos($filename,"/");
+		if ($p === false) return "./";
+		$folder = substr($filename,0,$p);
+		return $folder;
+	}
 	/**
 	 * Return mixed value as HTML format, (util for debug and fast presentation)
 	 *
@@ -6376,24 +6474,39 @@ class div{
 	 * @param string $errmsg
 	 * @param string $level
 	 */
-	static function error($errmsg, $level = "WARNING"){
+	static function error($errmsg, $level = DIV_ERROR_WARNING){
+
+		self::$__errors[] = array($errmsg, $level);
 
 		$iscli = self::isCli();
 
-		if ($iscli) $errmsg = self::htmlToText($errmsg);
-		if ($iscli === false) echo "<div style = \"z-index:9999; position: fixed; top: 20px; right: 20px;font-family: verdana; -moz-border-radius: 5px; padding: 10px;";
+		ob_start();
+		$func = 'warn';
+		if ($iscli) $errmsg = self::htmlToText($errmsg, null);
+		if ($iscli === false) echo "<div style = \"z-index:9999; position: fixed; top: ".((count(self::$__errors)-1)*50+10)."px; right: 20px; min-width: 60%; font-family: verdana; border-radius: 5px; padding: 10px;";
 		switch($level){
 			case DIV_ERROR_WARNING:
-				if (!$iscli) echo "background: yellow; border: 1px solid black; color: black;\"><strong>[[]]</strong> <cite>$level</cite>: $errmsg</div>";
-				else echo "[[]] $level: $errmsg\n";
+				if (!$iscli) echo "background: yellow; border: 1px solid black; color: black;\">[$level] $errmsg</div>";
+				else echo "$level: $errmsg\n";
+				$func = 'warn';
 				break;
 			case DIV_ERROR_FATAL:
-				if (!$iscli) echo "background: red; border: 1px solid black; color: white;\"><strong>[[]]</strong> <cite>$level</cite>: $errmsg</div>";
-				else echo "[[]] $level: $errmsg\n";
-				die();
+				if (!$iscli) echo "background: red; border: 1px solid black; color: white;\">[$level] $errmsg</div>";
+				else echo "$level: $errmsg\n";
+				$func = 'error';
 				break;
 		}
-		if (self::$__log_mode) $this->logger($errmsg, $level);
+
+		$msg = ob_get_contents();
+		ob_end_clean();
+
+		if ($iscli) echo '[[]]'.self::htmlToText($msg,null)."\n";
+		else echo $msg;
+
+		self::log($msg, $level);
+
+		if ($level == DIV_ERROR_FATAL) die();
+
 	}
 
 	/**
@@ -6413,13 +6526,30 @@ class div{
 	 * @param string $msg
 	 * @param string $level
 	 */
-	static function log($msg, $level = '      '){
-		$f = fopen(self::$__log_file, 'a');
+	static function log($msg, $level = 'INFO'){
+
+		$msg = self::htmlToText($msg, null);
 		$msg = str_replace("\n","\\n",$msg);
 		$msg = str_replace("\r","\\r",$msg);
-		$msg = '['.substr($level,0,6).'] '.date('Y-m-d h:i:s').' - '.$msg."\n";
-		fputs($f, $msg);
-		fclose($f);
+		$msg = '['.$level.'] '.date('Y-m-d h:i:s').' - '.$msg."\n";
+
+		if (self::$__log_mode){
+			$f = fopen(self::$__log_file, 'a');
+			fputs($f, $msg);
+			fclose($f);
+		}
+
+		$func = 'log';
+		
+		if ($level == DIV_ERROR_WARNING) $func = 'warn';
+		elseif($level == DIV_ERROR_FATAL) $func = 'error';
+		
+		if (!self::isCli()) {
+			$msg = str_replace("\n\r", " ", $msg);
+			$msg = str_replace("\n", ' ', $msg);
+			$msg = str_replace(array("\r", '"'), "", $msg);
+			echo "<script type=\"text/javascript\"> if (typeof console !== 'undefined') console.$func(\"[[]] $msg \");</script>\n";
+		}
 	}
 
 	/**
@@ -6428,8 +6558,8 @@ class div{
 	 * @param string $msg
 	 * @param string $level
 	 */
-	public function logger($msg, $level = '      '){
-		$msg = "ID: ".$this->getId()." > $msg";
+	public function logger($msg, $level = 'INFO'){
+		$msg = "TPL-ID: ".$this->getId()." > $msg";
 		self::log($msg, $level);
 	}
 
