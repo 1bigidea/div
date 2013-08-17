@@ -20,7 +20,7 @@
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
  *
  * @author Rafael Rodriguez Ramirez <rafa@pragres.com>
- * @version: 4.3
+ * @version: 4.5
  * @link http://divengine.com
  */
 
@@ -339,7 +339,7 @@ define('DIV_TEMPLATE_FOR_DOCS','
 					<tr><th></th><th></th><th>Type</th><th>Name</th><th>Description</th></tr>
 					[$vars]
 					
-						{?( trim("{$value}") !== "" )?}
+						{?( trim("{\'value}") !== "" )?}
 						<?
 							$value = trim(str_replace(array("\t","\n","\r")," ", $value));	
 							while(strpos($value, "  ")) $value = str_replace("  "," ", $value);
@@ -424,7 +424,7 @@ class div{
 	private static $__includes_historial = array();       // includes's historial
 
 	// Internals
-	private static $__version = '4.3';                    // current version of Div
+	private static $__version = '4.5';                    // current version of Div
 	private static $__super_class = null;                 // name of the super class
 	private static $__parent_method_names = array();      // name of parent class's methods
 	private static $__method_names = null;                // name of current methods
@@ -451,7 +451,10 @@ class div{
 	private static $__remember = array();                // remember previous work
 	private static $__dont_remember_it = array();        // do not remember it work
 	private static $__errors = array();                  // errors historial
-	
+
+	private static $__include_paths = null;
+	private static $__packages_by_class = array();
+
 	/**
 	 * Constructor
 	 *
@@ -470,6 +473,8 @@ class div{
 		}
 
 		$classname = get_class($this);
+
+		self::$__packages_by_class[$classname] = $this->__packages;
 
 		if (is_null(self::$__super_class)) self::$__super_class = $this->getSuperParent();
 		if (is_null(self::$__parent_method_names)) self::$__parent_method_names = get_class_methods(self::$__super_class);
@@ -501,8 +506,7 @@ class div{
 		}
 
 		if (!$discardfs){
-			if (self::isString($items)) if (strlen($this->__packages.$items.'.'.DIV_DEFAULT_DATA_FILE_EXT) < 255){
-
+			if (self::isString($items)) if (strlen($items.'.'.DIV_DEFAULT_DATA_FILE_EXT) < 255){
 				$exists = false;
 
 				if (self::fileExists($items)) {
@@ -511,12 +515,10 @@ class div{
 				} elseif (self::fileExists($items.'.'.DIV_DEFAULT_DATA_FILE_EXT)) {
 					$items = self::getFileContents($items.'.'.DIV_DEFAULT_DATA_FILE_EXT);
 					$exists = true;
-				} elseif (self::fileExists($this->__packages.$items.'.'.DIV_DEFAULT_DATA_FILE_EXT)) {
-					$items = self::getFileContents($this->__packages.$items.'.'.DIV_DEFAULT_DATA_FILE_EXT);
-					$exists = true;
 				}
 
 				if ($exists === true || $decode === true) $items = self::jsonDecode($items);
+				if ($exists === true) break;
 			}
 		}
 
@@ -558,6 +560,36 @@ class div{
 
 		self::setSubParser('parse', 'subParse_parse');
 		self::setSubParser('html_wysiwyg', 'subParse_html_wysiwyg');
+	}
+
+	/**
+	 * Return a list of include_path setting + the PACKAGES
+	 *
+	 * @return array
+	 */
+	final static function getIncludePaths($packages = PACKAGES){
+		if (is_null(self::$__include_paths)){
+			$os = self::getOperatingSystem();
+			self::$__include_paths = explode(($os == "win32"?";":":"), ini_get("include_path"));
+			self::$__include_paths[] = $packages;
+		}
+		return self::$__include_paths;
+	}
+
+	/**
+	 * Return the current operating system
+	 *
+	 * @return string (win32/linux/unix)
+	 */
+	final static function getOperatingSystem(){
+		if (isset($_SERVER['SERVER_SOFTWARE'])) {
+			if (isset($_SERVER['WINDIR']) || strpos($_SERVER['SERVER_SOFTWARE'], 'Win32') !== FALSE) return "win32";
+			if (!isset($_SERVER['WINDIR']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Linux') !== FALSE) return "linux";
+		}
+
+		if (file_exists("C:\Windows")) return "win32";
+
+		return "unix";
 	}
 
 	/**
@@ -806,14 +838,13 @@ class div{
 	 * @return string
 	 */
 	final public function loadTemplate($path){
-		
+
 		if (self::$__log_mode === true) $this->logger("Loading the template: $path");
-		
+
 		$src = $path;
-		$l = strlen($this->__packages);
-		if (substr($path,0,$l) == $this->__packages) $path = substr($path,$l);
+
 		if (strlen($path) < 255){
-			$paths = array($this->__packages.$path, $this->__packages.$path.'.'.DIV_DEFAULT_TPL_FILE_EXT, $path, $path.'.'.DIV_DEFAULT_TPL_FILE_EXT);
+			$paths = array($path, $path.'.'.DIV_DEFAULT_TPL_FILE_EXT, $path, $path.'.'.DIV_DEFAULT_TPL_FILE_EXT);
 
 			foreach($paths as $pathx) {
 				if (strlen($pathx) < 255)
@@ -1013,7 +1044,7 @@ class div{
 									$pos = $ini + $ltagini;
 									continue;
 								}
-									
+
 							}
 						}
 					}
@@ -1069,7 +1100,7 @@ class div{
 					if ($begin_suffix !='' && !is_null($begin_suffix)){
 						$suffix_pos = strpos($src, $begin_suffix, $prefix_pos + 1);
 					} else {
-							
+
 						$stopchars = array(' ',"\n", "\r", "\t", "<", ">");
 						$stoppos = array();
 
@@ -1758,7 +1789,7 @@ class div{
 				strtolower($value),
 				htmlentities($value),
 				nl2br($value),
-				preg_replace("%(?<!\\\\\\\\)'%", "\\'", $value),
+				preg_replace(array("%(?<!\\\\\\\\)'%","%(?<!\\\\\\\\)\"%"), array("\\'","\\\""), $value),
 				strtr($value, array("\\" => "\\\\", "'" => "\\'", "\"" => "\\\"", "\r" => "\\r", "\n" => "\\n", "</" => "<\/" ))
 				),$substr);
 
@@ -2192,12 +2223,12 @@ class div{
 	 */
 	final public function getTplPath($path){
 
-		if (self::fileExists($this->__packages.$path.".".DIV_DEFAULT_TPL_FILE_EXT)) $path .= ".".DIV_DEFAULT_TPL_FILE_EXT;
+		if (self::fileExists($path.".".DIV_DEFAULT_TPL_FILE_EXT)) $path .= ".".DIV_DEFAULT_TPL_FILE_EXT;
 
 		$path = str_replace(".".DIV_DEFAULT_TPL_FILE_EXT.".".DIV_DEFAULT_TPL_FILE_EXT, ".".DIV_DEFAULT_TPL_FILE_EXT, $path);
 
 		// Relative path
-		if (!self::fileExists($this->__packages.$path)){
+		if (!self::fileExists($path)){
 			if ($this->__path != ""){
 				if (self::fileExists($this->__path)){
 					$folder = self::getFolderOf($this->__path);
@@ -2211,16 +2242,16 @@ class div{
 
 		// Resolving with the historial	...
 		$max = 0;
-		$return = $this->__packages.$path;
+		$return = $path;
 		foreach(self::$__includes_historial as $ih){
 			$folder = self::getFolderOf($ih);
 			$fullpath = $folder."/".$path;
 
 			if (self::fileExists($fullpath.".".DIV_DEFAULT_TPL_FILE_EXT)) $fullpath .= ".".DIV_DEFAULT_TPL_FILE_EXT;
-			else if (self::fileExists($this->__packages.$fullpath.".".DIV_DEFAULT_TPL_FILE_EXT)) $fullpath .= ".".DIV_DEFAULT_TPL_FILE_EXT;
+			else if (self::fileExists($fullpath.".".DIV_DEFAULT_TPL_FILE_EXT)) $fullpath .= ".".DIV_DEFAULT_TPL_FILE_EXT;
 
 			$similar = similar_text($ih, $fullpath);
-			if ((self::fileExists($fullpath) || self::fileExists($this->__packages.$fullpath)) && $similar >= $max) $return = $fullpath;
+			if ((self::fileExists($fullpath) || self::fileExists($fullpath)) && $similar >= $max) $return = $fullpath;
 		}
 		return $return;
 	}
@@ -2272,7 +2303,7 @@ class div{
 			if (isset($this->__ignore[$key])) continue;
 
 			if (strpos($this->__src,  $prefix.$key.$suffix) !== false && self::isString($value)){
-				if (self::fileExists($this->__packages.$value.".".DIV_DEFAULT_TPL_FILE_EXT)) $value .= ".".DIV_DEFAULT_TPL_FILE_EXT;
+				if (self::fileExists($value.".".DIV_DEFAULT_TPL_FILE_EXT)) $value .= ".".DIV_DEFAULT_TPL_FILE_EXT;
 				$this->__src = str_replace($prefix.$key.$suffix, $prefix.$value.$suffix, $this->__src);
 			}
 		}
@@ -2324,7 +2355,7 @@ class div{
 						$c = $this->prepareDialect($c, $tpl_prop);
 
 						if (self::$__docs_on){
-							if (file_exists($this->__path) || file_exists(PACKAGES.$this->__path)){
+							if (self::fileExists($this->__path) || self::fileExists(PACKAGES.$this->__path)){
 								$section = trim($this->__path);
 								$contained = trim($path);
 
@@ -2354,7 +2385,7 @@ class div{
 						if ($exc['end'] > $ini) $exclusion[$idx]['end'] += $lenc;
 					}
 
-					$exclusion[] = array("path" => $path, "ini" => $ini, "end" => $ini + $lenc);
+					$exclusion["inclusion-".$this->__path] = array("path" => $path, "ini" => $ini, "end" => $ini + $lenc);
 
 					$this->__src = substr($this->__src, 0, $ini). $c . substr($this->__src, $fin + $l2);
 
@@ -2394,7 +2425,7 @@ class div{
 		if (is_array($items)) foreach ($items as $key => $value) {
 			if (isset($this->__ignore[$key])) continue;
 			if (strpos($this->__src,  $prefix.$key.$suffix) !== false ){
-				if (self::fileExists($this->__packages.$value.".".DIV_DEFAULT_TPL_FILE_EXT)) $value .= ".".DIV_DEFAULT_TPL_FILE_EXT;
+				if (self::fileExists($value.".".DIV_DEFAULT_TPL_FILE_EXT)) $value .= ".".DIV_DEFAULT_TPL_FILE_EXT;
 				$this->__src = str_replace($prefix.$key.$suffix, $prefix.$value.$suffix, $pre);
 			}
 		}
@@ -2431,7 +2462,7 @@ class div{
 				$engine->__src = $c;
 
 				if (self::$__docs_on){
-					if (file_exists($this->__path) || file_exists(PACKAGES.$this->__path)){
+					if (self::fileExists($this->__path)){
 						$section = trim($this->__path);
 						$contained = trim($path);
 
@@ -2865,14 +2896,15 @@ class div{
 					}
 
 					if (!self::issetVar($var, $items) || self::issetVar($var, self::$__globals_design)) {
-						if (self::fileExists($this->__packages.$exp) && !self::isDir($this->__packages.$exp)) {
-							$fgc = self::getFileContents($this->__packages.$exp);
+
+						if (self::fileExists($exp) && !self::isDir($exp)) {
+							$fgc = self::getFileContents($exp);
 							if ($fgc != "")	$exp = $fgc;
-						} elseif (self::fileExists($this->__packages.$exp.".".DIV_DEFAULT_DATA_FILE_EXT) && !self::isDir($this->__packages.$exp.".".DIV_DEFAULT_DATA_FILE_EXT)) {
-							$fgc = self::getFileContents($this->__packages.$exp.".".DIV_DEFAULT_DATA_FILE_EXT);
+						} elseif (self::fileExists($exp.".".DIV_DEFAULT_DATA_FILE_EXT) && !self::isDir($exp.".".DIV_DEFAULT_DATA_FILE_EXT)) {
+							$fgc = self::getFileContents($exp.".".DIV_DEFAULT_DATA_FILE_EXT);
 							if ($fgc != "") $exp = $fgc;
-						} elseif (self::fileExists($this->__packages.$exp.".".DIV_DEFAULT_TPL_FILE_EXT) && !self::isDir($this->__packages.$exp.".".DIV_DEFAULT_TPL_FILE_EXT)) {
-							$fgc = self::getFileContents($this->__packages.$exp.".".DIV_DEFAULT_TPL_FILE_EXT);
+						} elseif (self::fileExists($exp.".".DIV_DEFAULT_TPL_FILE_EXT) && !self::isDir($exp.".".DIV_DEFAULT_TPL_FILE_EXT)) {
+							$fgc = self::getFileContents($exp.".".DIV_DEFAULT_TPL_FILE_EXT);
 							if ($fgc != "") $exp = $fgc;
 						}
 
@@ -2960,10 +2992,10 @@ class div{
 				$replace = $arr[1];
 			}
 
-			if (self::fileExists($this->__packages.$replace) && !self::isDir($this->__packages.$search)) $replace = self::jsonDecode(self::getFileContents($this->__packages.$replace),self::cop($this->__memory, $items));
-			if (self::fileExists($this->__packages.$replace.".".DIV_DEFAULT_DATA_FILE_EXT) && !self::isDir($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT)) $replace = self::jsonDecode(self::getFileContents($this->__packages.$replace.".".DIV_DEFAULT_DATA_FILE_EXT),self::cop($this->__memory, $items));
-			if (self::fileExists($this->__packages.$search) && !self::isDir($this->__packages.$search)) $search = self::jsonDecode(self::getFileContents($this->__packages.$search),self::cop($this->__memory, $items));
-			if (self::fileExists($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT) && !self::isDir($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT)) $search = self::jsonDecode(self::getFileContents($this->__packages.$search.".".DIV_DEFAULT_DATA_FILE_EXT),self::cop($this->__memory, $items));
+			if (self::fileExists($replace) && !self::isDir($search)) $replace = self::jsonDecode(self::getFileContents($replace),self::cop($this->__memory, $items));
+			if (self::fileExists($replace.".".DIV_DEFAULT_DATA_FILE_EXT) && !self::isDir($search.".".DIV_DEFAULT_DATA_FILE_EXT)) $replace = self::jsonDecode(self::getFileContents($replace.".".DIV_DEFAULT_DATA_FILE_EXT),self::cop($this->__memory, $items));
+			if (self::fileExists($search) && !self::isDir($search)) $search = self::jsonDecode(self::getFileContents($search),self::cop($this->__memory, $items));
+			if (self::fileExists($search.".".DIV_DEFAULT_DATA_FILE_EXT) && !self::isDir($search.".".DIV_DEFAULT_DATA_FILE_EXT)) $search = self::jsonDecode(self::getFileContents($search.".".DIV_DEFAULT_DATA_FILE_EXT),self::cop($this->__memory, $items));
 
 			if (is_null($var)){
 				self::setDefault($search, $replace);
@@ -3439,7 +3471,7 @@ class div{
 		$this->getBlockRanges(null,
 		DIV_TAG_CONDITIONAL_TRUE_BEGIN_PREFIX,  DIV_TAG_CONDITIONAL_TRUE_BEGIN_SUFFIX,
 		DIV_TAG_CONDITIONAL_TRUE_END_PREFIX,    DIV_TAG_CONDITIONAL_TRUE_END_SUFFIX),
-			
+
 		$this->getBlockRanges(null,
 		DIV_TAG_CONDITIONAL_FALSE_BEGIN_PREFIX, DIV_TAG_CONDITIONAL_FALSE_BEGIN_SUFFIX,
 		DIV_TAG_CONDITIONAL_FALSE_END_PREFIX,   DIV_TAG_CONDITIONAL_FALSE_END_SUFFIX)
@@ -3889,7 +3921,7 @@ class div{
 
 		$itemsx = array_merge($this->__memory, $items);
 		if (!isset($flags['level'])) $flags['level'] = self::$__parse_level;
-			
+
 		foreach (self::$__sub_parsers as $parser => $function){
 
 			// Checking the moment/event
@@ -3912,7 +3944,7 @@ class div{
 			if (method_exists($this, $function)) $code = '$this->'.$function;
 
 			if (self::$__log_mode) $this->logger("Parsing the subparser $parser ...");
-			
+
 			$ignore = false;
 			$p = 0;
 			while(true){
@@ -4119,9 +4151,9 @@ class div{
 	 * @param integer $checksum
 	 */
 	final private function makeItAgain($checksum, &$items){
-		
+
 		if (self::$__log_mode === true) $this->logger("Making again some remembered tasks...");
-		
+
 		$simple = DIV_TAG_REPLACEMENT_PREFIX.DIV_TAG_MODIFIER_SIMPLE;
 
 		foreach(self::$__remember[$checksum] as $params){
@@ -4214,6 +4246,7 @@ class div{
 			$src = str_replace("\n\r","\n", $src);
 			$lines = explode("\n", $src);
 			$nsrc ='';
+			$engine = self::getAuxiliaryEngineClone($this->__memory);
 			foreach($lines as $line){
 				$line = trim($line);
 				if (substr($line,0,2)=='@_'){
@@ -4226,6 +4259,9 @@ class div{
 							if (!isset($properties[$var])){
 								array_shift($arr);
 								$value = implode('=', $arr);
+								$engine->__src = $value;
+								$engine->parse(false);
+								$value = $engine->__src;
 								$vvalue = self::jsonDecode($value, $this->__memory);
 								if (!is_null($vvalue)) $value = $vvalue; else $value = trim($value);
 								$properties[$var]=$value;
@@ -4275,9 +4311,12 @@ class div{
 			$f = trim($properties['DIALECT']);
 
 			if (self::$__log_mode === true) $this->logger("Preparing the dialect...");
-			
-			if (self::fileExists($this->__packages.$f) && $f !== '') $json = file_get_contents($this->__packages.$f);
-			else $json = DIV_DEFAULT_DIALECT;
+
+			$json = DIV_DEFAULT_DIALECT;
+
+			if (self::fileExists($f) && $f !== '') {
+				$json = self::getFileContents($f);
+			}
 
 			if (!is_null($json)){
 				$src = $this->translateFrom($json, $src);
@@ -4515,12 +4554,12 @@ class div{
 			foreach($this->__restore as $restore_id => $rest) $this->__src = str_replace('{'.$restore_id.'}', $rest, $this->__src);
 
 			$this->clean();
-			$this->parseSpecialChars();
-			$this->txt();
-
+			
 			// Restoring ignored parts
 			if (self::$__parse_level == 1){
 
+				$this->parseSpecialChars();
+				
 				foreach(self::$__ignored_parts as $id => $ignore) {
 
 					foreach(self::$__sub_parsers as $subparser => $function){
@@ -4544,6 +4583,8 @@ class div{
 			}
 		}
 
+		$this->txt();
+		
 		if (strpos($this->__src,  DIV_TAG_SUBPARSER_BEGIN_PREFIX) !== false) {
 			$items = array_merge($this->__memory, $items);
 			$this->parseSubParsers($items, array(
@@ -4794,7 +4835,7 @@ class div{
 	final public function translateFrom($dialectFrom, $src = null, $items = null){
 
 		if (self::$__log_mode === true) $this->logger("Translating to current dialect...");
-		
+
 		$update = false;
 		if (is_null($src)) {
 			$src = &$this->__src;
@@ -4812,15 +4853,17 @@ class div{
 		if (is_string($dialectFrom)) $dialectFrom = self::jsonDecode($dialectFrom);
 		if (is_object($dialectFrom)) $dialectFrom = get_object_vars($dialectFrom);
 		if (!is_array($dialectFrom)) return false;
+
 		foreach($constants as $c => $v) if (!isset($dialectFrom[$c])) $dialectFrom[$c] = $v;
 
 		foreach($dialectFrom as $c=>$v) eval('$'.$c.' = $v;');
 
 		// Searching differences
 		$different = false;
+
 		foreach($dialectFrom as $c=>$v) {
-			if ($v !== $$c) {
-				$different = false;
+			if ($v !== constant($c)) {
+				$different = true;
 				break;
 			}
 		}
@@ -4855,6 +4898,7 @@ class div{
 		);
 
 		arsort($order);
+
 		$modifiers = array('DIV_TAG_MODIFIER_SIMPLE',
 						'DIV_TAG_MODIFIER_CAPITALIZE_FIRST',
 						'DIV_TAG_MODIFIER_CAPITALIZE_WORDS',
@@ -4935,7 +4979,6 @@ class div{
 
 							// Substring
 							$subsrc = str_replace($DIV_TAG_SUBMATCH_SEPARATOR, DIV_TAG_SUBMATCH_SEPARATOR, $subsrc);
-
 							$src = substr($src, 0, $ini).DIV_TAG_REPLACEMENT_PREFIX.$values[1].$subsrc.DIV_TAG_REPLACEMENT_SUFFIX.substr($src,$end+$lsuffix);
 
 							$p = $ini + 1; //IMPORTANT!
@@ -5025,6 +5068,7 @@ class div{
 					DIV_TAG_FORMULA_BEGIN, DIV_TAG_FORMULA_END,$DIV_TAG_FORMULA_FORMAT_SEPARATOR,DIV_TAG_FORMULA_FORMAT_SEPARATOR, false);
 					break;
 				case 'subparsers':
+						
 					foreach(self::$__sub_parsers as $subparser => $function){
 						$src = str_replace(
 						$DIV_TAG_SUBPARSER_BEGIN_PREFIX.$subparser.$DIV_TAG_SUBPARSER_BEGIN_SUFFIX,
@@ -5531,6 +5575,7 @@ class div{
 		if (is_null($value)) return "";
 		return "$value";
 	}
+
 	/**
 	 * Complete object/array properties
 	 *
@@ -5656,7 +5701,7 @@ class div{
 		$str = trim(preg_replace(array('#^\s*//(.+)$#m','#^\s*/\*(.+)\*/#Us', '#/\*(.+)\*/\s*$#Us'), '', $str));
 
 		// Syntax specific for div
-		if ($str[0] == '$') {
+		if (isset($str[0])) if ($str[0] == '$') {
 			$str = substr($str,1);
 			$r = self::getVarValue($str, $items);
 			return $r;
@@ -5937,6 +5982,16 @@ class div{
 	}
 
 	/**
+	 * Return the first instance of $this->__packages
+	 *
+	 */
+	static function getPackagesPath(){
+		$class = get_class();
+		if (isset(self::$__packages_by_class[$class])) return self::$__packages_by_class[$class];
+		return PACKAGES;
+	}
+
+	/**
 	 * Secure 'file exists' method
 	 * @param string $filename
 	 * @return boolean
@@ -5948,7 +6003,23 @@ class div{
 		return false;
 
 		if (strlen($filename) > DIV_MAX_FILENAME_SIZE) return false;
-		return file_exists($filename);
+
+		if (file_exists($filename)) return true;
+
+		$ipaths = self::getIncludePaths(self::getPackagesPath());
+		foreach($ipaths as $ipath) {
+
+			$pathx = str_replace("\\","/",$ipath."/".$filename);
+			while (strpos($pathx,"//")!==false){
+				$pathx = str_replace("//","/",$pathx);
+			}
+			$pathx = str_replace("/./","/",$pathx);
+			if (substr($pathx,0,2)=="./") $pathx = substr($pathx,2);
+				
+			if (file_exists($pathx)) return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -5979,7 +6050,22 @@ class div{
 		substr(strtolower($filename),0,6) == 'ftp://')
 		return $filename;
 
-		return file_get_contents($filename);
+		if (file_exists($filename)) return file_get_contents($filename);
+
+		$ipaths = self::getIncludePaths(self::getPackagesPath());
+
+		foreach($ipaths as $ipath) {
+			$pathx = str_replace("\\","/",$ipath."/".$filename);
+			while (strpos($pathx,"//")!==false){
+				$pathx = str_replace("//","/",$pathx);
+			}
+			$pathx = str_replace("/./","/",$pathx);
+			if (substr($pathx,0,2)=="./") $pathx = substr($pathx,2);
+				
+			if (file_exists($pathx)) return file_get_contents($pathx);
+		}
+
+		return null;
 	}
 
 	/**
@@ -6540,10 +6626,10 @@ class div{
 		}
 
 		$func = 'log';
-		
+
 		if ($level == DIV_ERROR_WARNING) $func = 'warn';
 		elseif($level == DIV_ERROR_FATAL) $func = 'error';
-		
+
 		if (!self::isCli()) {
 			$msg = str_replace("\n\r", " ", $msg);
 			$msg = str_replace("\n", ' ', $msg);

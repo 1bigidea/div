@@ -1,4 +1,27 @@
 ----------------------------
+July 29, 2013
+----------------------------
+- Decrease of priority in parser's specialchars
+
+----------------------------
+July 27, 2013
+----------------------------
+- bugfixs!
+- Release 4.4 version
+
+----------------------------
+July 19, 2013
+----------------------------
+- bugfix the translator
+- New feature: Multi template sources (based on include_path PHP setting)
+----------------------------
+June 15, 2013
+----------------------------
+- Improvement of the modifier "escape single quotes" (\') 
+  to "escape single/double quotes" (\").
+- Improvement of default documentation's template.
+
+----------------------------
 June 15, 2013
 ----------------------------
 - Improvement of logs's system

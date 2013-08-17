@@ -1,5 +1,5 @@
 ﻿---------------------------------------
-[[]] Div PHP Template Engine 4.3
+[[]] Div PHP Template Engine 4.4
 ---------------------------------------
 by Rafa Rodríguez (rafa@pragres.com)
 
@@ -70,7 +70,7 @@ Possibilities for the programmer? The programmer creates an instance of div
 class, specifying in its constructor, the template	created by the designer 
 and the information that will be displayed.
 	
-For more information visit our site http://www.divengine.com and
+For more information visit our site http://divengine.com and
 the documentation div.html or http://divengine.com/documentation. 
 
 Contact us via contact@divengine.com.
