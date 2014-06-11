@@ -1,4 +1,77 @@
 ----------------------------
+February 05,  2013
+----------------------------
+- Memory fixed!
+  
+----------------------------
+December 25,  2013
+----------------------------
+- bugfix: div::fileExists and wrong include paths calculation
+
+----------------------------
+December 5,  2013
+----------------------------
+- Improvement of global design vars in loops and capsules
+
+----------------------------
+December 4,  2013
+----------------------------
+- bugfix: div::getFileContents()
+
+----------------------------
+August 30, 2013
+----------------------------
+- An important bug was fixed: the memory in the loops:
+
+	In div 4.4 dont't work:
+	
+	index.php
+	--------------------------------
+	<?php
+	
+	include "div.php";
+	echo new div("test.tpl", array("cities" => array("Havana", "Tokyo")));
+	
+	index.tpl
+	--------------------------------
+	{= foo: [
+		{ title: "Cities",
+		  content: '{% cities.tpl %}'
+		}
+	] =}
+
+	{% layout.tpl %}
+
+	layout.tpl
+	---------------------------------
+	?$foo
+		[$foo]
+			<h1>{$title}</h1>
+			{$content}<br/>
+		[/$foo]		
+	$foo?
+	
+	cities.tpl
+	---------------------------------
+	?$cities
+		[$cities]
+			{$value}
+		[/$cities]
+	@else@
+		No cities
+	$cities?
+	
+	Output (wrong!)
+	---------------------------------
+	<h1>Cities</h1>
+	No cities<br/>
+
+	Output (great in 4.5)
+	---------------------------------
+	<h1>Cities</h1>
+	Havana Tokio<br/>
+
+----------------------------
 July 29, 2013
 ----------------------------
 - Decrease of priority in parser's specialchars
@@ -99,7 +172,7 @@ June 12, 2013
   {= position: "absolute" =}
 
   {?( "{$position}" == "absolute" )?} 
-		{= absolute: true =}
+            {= absolute: true =}
   @else@
 	    {= absolute: false =}
   {/?}
@@ -115,23 +188,23 @@ June 12, 2013
   
   index.tpl
   ----------------
-	{= foo: true =}
-	{= bar: [1,2,3] =}
-	
-	?$foo
-	YES
-	$foo?
-	
-	[$bar]
-		{= foo: (# {$value} > 1 #) =} 
-		?$foo
-			YES
-		@else@
-			NO	
-		$foo?
-	[/$bar]
-	
-	{$foo}
+    {= foo: true =}
+    {= bar: [1,2,3] =}
+
+    ?$foo
+    YES
+    $foo?
+
+    [$bar]
+            {= foo: (# {$value} > 1 #) =}
+            ?$foo
+                    YES
+            @else@
+                    NO
+            $foo?
+    [/$bar]
+
+    {$foo}
 	
   Output
   --------------
