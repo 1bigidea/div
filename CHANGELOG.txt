@@ -1,4 +1,36 @@
 ----------------------------
+June 30,  2013
+----------------------------
+
+- Add new important security feature: setup literals items/vars, for prevent injections! 
+
+Example:
+
+index.tpl
+---------------
+{= div.literals: "text1 text2" =} <!-- or {= div.literals: ["text1","text2"] =} -->
+
+{$text1}
+
+{$text2}
+
+{$text3}
+
+index.php
+---------------
+echo new div('index.tpl', array(
+	'text1' => '{/ignore}[:1,5:] {$value} [/]{ignore}', //I am being about deceiving the security
+	'text2' => '[:1,100;] text to repeat [/]',
+	'text3' => '[:1,3;] some [/]'
+));
+
+output
+---------------
+[:1,5;] {$value} [/]
+[:1,100;] text to repeat [/]
+some some some
+
+----------------------------
 June 16,  2013
 ----------------------------
 - Some bugfixs
