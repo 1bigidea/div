@@ -1,7 +1,7 @@
 ----------------------------
 June 30,  2013
 ----------------------------
-
+- Some bugfixs
 - Add new important security feature: setup literals items/vars, for prevent injections! 
 
 Example:
@@ -29,12 +29,6 @@ output
 [:1,5;] {$value} [/]
 [:1,100;] text to repeat [/]
 some some some
-
-----------------------------
-June 16,  2013
-----------------------------
-- Some bugfixs
-- Release 4.5
 
 ----------------------------
 February 05,  2013

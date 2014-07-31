@@ -3515,9 +3515,6 @@ class div {
 							$exp = '"' . str_replace('"', '\"', $exp) . '"';
 						}
 						
-						foreach ( self::$__ignored_parts as $id => $ignore )
-							$exp = str_replace('{' . $id . '}', $ignore, $exp);
-						
 						$value = self::jsonDecode($exp, self::cop($this->__memory, $items));
 						
 						$remember['vars'] = array();
@@ -5375,6 +5372,23 @@ class div {
 					
 					$this->__src = str_replace('{' . $id . '}', $ignore, $this->__src);
 				}
+				
+				$items = $this->__memory;
+				$vars = $this->getVars($items);
+				foreach ( $vars as $var ) {
+					
+					$exp = self::getVarValue($var, $items);
+					
+					if (is_string($exp)) {
+
+						foreach ( self::$__ignored_parts as $id => $ignore )
+							$exp = str_replace('{' . $id . '}', $ignore, $exp);
+						
+						self::setVarValue($var, $exp, $items);
+					}
+				}
+				
+				$this->__memory = $items;
 				
 				self::$__ignored_parts = array();
 				self::$__globals_design = array();
