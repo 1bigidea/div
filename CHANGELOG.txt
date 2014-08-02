@@ -1,5 +1,10 @@
 ----------------------------
-June 30,  2013
+August 2,  2014
+----------------------------
+- Allow is_array PHP function in macros
+
+----------------------------
+June 30,  2014
 ----------------------------
 - Some bugfixs
 - Add new important security feature: setup literals items/vars, for prevent injections! 
@@ -31,7 +36,7 @@ output
 some some some
 
 ----------------------------
-February 05,  2013
+February 05,  2014
 ----------------------------
 - Memory fixed!
   
