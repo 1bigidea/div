@@ -1,4 +1,9 @@
 ----------------------------
+August 4,  2014
+----------------------------
+- Fix macros logical order
+
+----------------------------
 August 2,  2014
 ----------------------------
 - Allow is_array PHP function in macros

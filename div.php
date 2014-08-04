@@ -4844,8 +4844,10 @@ class div {
 		if ($chkdata) {
 			$rang = $this->getRanges(DIV_TAG_TPLVAR_BEGIN, DIV_TAG_TPLVAR_END, null, true);
 			if (count($rang) > 0)
-				if ($rang[0][0] < $ini)
+				if ($rang[0][0] < $ini){
+					
 					return $ini + 1;
+				}
 		}
 		
 		if ($chkloops) {
@@ -4853,15 +4855,19 @@ class div {
 				$prev_use = strpos($this->__src, DIV_TAG_LOOP_BEGIN_PREFIX . $var . DIV_TAG_LOOP_BEGIN_SUFFIX);
 			else
 				$prev_use = $this->searchPreviousLoops($ini);
-			if ($prev_use !== false && $prev_use < $ini)
+			
+			if ($prev_use !== false && $prev_use < $ini){
+				
 				return $ini + 1;
+			} 
 		}
 		
 		if ($chkmatchs)
 			foreach ( self::$__modifiers as $m ) {
 				$prev_use = strpos($this->__src, DIV_TAG_REPLACEMENT_PREFIX . $m . $var);
-				if ($prev_use !== false && $prev_use < $ini)
+				if ($prev_use !== false && $prev_use < $ini){
 					return $ini + 1;
+				}
 			}
 		
 		if ($chkformats) {
@@ -4881,7 +4887,7 @@ class div {
 	 *
 	 * @param mixed $items
 	 */
-	final public function parseMacros(&$items = null){
+	final public function parseMacros(&$items = null, $ignore_previous_match = false){
 		if (self::$__log_mode)
 			$this->logger("Parsing macros...");
 		
@@ -4907,9 +4913,10 @@ class div {
 			$this->__temp['ini'] = $this->__temp['ranges'][0][0];
 			$this->__temp['fin'] = $this->__temp['ranges'][0][1];
 			
-			$this->__temp['r'] = $this->checkLogicalOrder($this->__temp['ini'], "", true, true, true, false);
+			$this->__temp['r'] = $this->checkLogicalOrder($this->__temp['ini'], "", true, !$ignore_previous_match, true, false);
 			
 			if ($this->searchInListRanges($this->__temp['ini'])) {
+				
 				$this->__temp['p'] = $this->__temp['ini'] + 1;
 				continue;
 			}
@@ -5502,8 +5509,18 @@ class div {
 			
 			$this->clean();
 			
-			// Restoring ignored parts
+			// The last action
 			if (self::$__parse_level == 1) {
+				
+				// Parsing macros
+				
+				if (strpos($this->__src, DIV_TAG_MACRO_BEGIN) !== false) {
+					$items = array_merge($this->__memory, $items);
+					$items = $this->parseMacros($items,true);
+					$this->memory($items);
+				}
+
+				// Restoring ignored parts
 				
 				$this->parseSpecialChars();
 				
@@ -5526,7 +5543,7 @@ class div {
 					$this->__src = str_replace('{' . $id . '}', $ignore, $this->__src);
 				}
 				
-				// Restoring inside values
+				// Restoring ignored parts inside values
 				$items = $this->__memory;
 				$vars = $this->getVars($items);
 				
