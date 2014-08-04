@@ -1,7 +1,7 @@
 ----------------------------
 August 4,  2014
 ----------------------------
-- Fix macros logical order
+- Fix macros parsing when a previous template var never match
 
 ----------------------------
 August 2,  2014
