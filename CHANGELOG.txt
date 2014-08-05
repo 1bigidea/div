@@ -1,4 +1,9 @@
 ----------------------------
+August 5,  2014
+----------------------------
+- Fix the memory in the loops
+
+----------------------------
 August 4,  2014
 ----------------------------
 - Fix macros parsing when a previous template var never match
