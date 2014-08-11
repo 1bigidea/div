@@ -5474,7 +5474,6 @@ class div {
 						
 						// Discard literal vars
 					if (strpos($this->__src, DIV_TAG_IGNORE_BEGIN) !== false || strpos($this->__src, '{' . $this->__ignore_secret_tag . '}') !== false)
-						
 						$this->parseIgnore();
 						
 						// Subparse: after replace
@@ -5547,7 +5546,15 @@ class div {
 					$this->memory($items);
 				}
 				
-				// Restoring ignored parts
+				// Sub-Matches
+				if (self::atLeastOneString($this->__src, self::$__modifiers))
+					$this->parseSubmatches($items);
+					
+					// Matches
+				if (self::atLeastOneString($this->__src, self::$__modifiers) || (strpos($this->__src, DIV_TAG_NUMBER_FORMAT_PREFIX) !== false && strpos($this->__src, DIV_TAG_NUMBER_FORMAT_SUFFIX) !== false))
+					$this->parseMatches($items);
+					
+					// Restoring ignored parts
 				
 				$this->parseSpecialChars();
 				
