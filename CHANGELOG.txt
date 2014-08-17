@@ -1,4 +1,11 @@
 ----------------------------
+August 17,  2014
+----------------------------
+- Security fix: prevent obtrusive code in method calls. Now next code dont work:
+
+{= content: ->getPage(file_put_contents('some.txt','some text')) =}
+
+----------------------------
 August 5,  2014
 ----------------------------
 - Fix the memory in the loops
