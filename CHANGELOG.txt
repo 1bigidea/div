@@ -1,4 +1,51 @@
 ----------------------------
+August 28,  2014
+----------------------------
+- New feature for preprocessed templates: specific data
+  
+  Syntax:
+  
+  {%% tpl_file: data %%}
+  
+  data is: json, name of var or filename with json
+  
+  Example:
+  
+  Now is more simple to build the components:
+  
+  index.tpl
+  ------------
+  {%% form: {
+  		action: "login.php",
+  		method: "post.php",
+  		fields: [
+  			{
+  				type: "text",
+  				name: "user",
+  				label: "User"
+  			},{
+  				type: "password",
+  				name: "pass",
+  				label: "Password"
+  			}
+  		],
+  		submit: {
+  			value: "login",
+  			name: "btnLogin"
+  		}
+  } %%}
+  
+  form.tpl
+  ------------
+  <form action="{$action}" method="{$method}">
+  	[$fields]
+  		{$label}:<br/>
+  		<input type="{$type}" name="{$name}"><br/>
+  	[/$fields]
+  	<input type="submit" name="{$name}" value="{$value}">
+  </form>
+      
+----------------------------
 August 17,  2014
 ----------------------------
 - Security fix: prevent obtrusive code in method calls. Now next code dont work:
