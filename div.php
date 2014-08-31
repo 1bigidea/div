@@ -3134,10 +3134,11 @@ class div {
 						$pdata = self::getVarValue($pdata, $items);
 					else
 						$pdata = self::jsonDecode($pdata);
-					
-					$items = $pdata;
-					if (is_object($items)) 
-						$items = get_object_vars($items);
+				
+					if (is_object($pdata)) 
+						$pdata = get_object_vars($pdata);
+						
+					$items = array_merge($items, $pdata);
 				}
 			}
 			
