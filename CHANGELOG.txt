@@ -11,7 +11,7 @@ August 28,  2014
   
   Example:
   
-  Now is more simple to build the components:
+  Now is more simple for build the components:
   
   index.tpl
   ------------
