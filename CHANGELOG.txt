@@ -1,4 +1,13 @@
 ----------------------------
+September 9,  2014
+----------------------------
+- bugfix: Adding items to array in templates
+
+{= somearray[]: "new item" =}
+
+- bugfix: Don't set item var as design var in div::parseData();
+
+----------------------------
 September 8,  2014
 ----------------------------
 - bugfix: Parse pre-processed templates with all items/vars (Div doesn't know the future)
