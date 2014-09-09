@@ -268,7 +268,7 @@ if (! defined('DIV_TAG_PREPROCESSED_END'))
 	define('DIV_TAG_PREPROCESSED_END', ' %%}');
 if (! defined('DIV_TAG_PREPROCESSED_SEPARATOR'))
 	define('DIV_TAG_PREPROCESSED_SEPARATOR', ':');
-
+	
 	// Capsules
 if (! defined('DIV_TAG_CAPSULE_BEGIN_PREFIX'))
 	define('DIV_TAG_CAPSULE_BEGIN_PREFIX', '[[');
@@ -390,6 +390,7 @@ define('DIV_DEFAULT_DIALECT', '{
 		\'DIV_TAG_DEFAULT_REPLACEMENT_BEGIN\' : \'{@\',		        \'DIV_TAG_DEFAULT_REPLACEMENT_END\' : \'@}\',
 		\'DIV_TAG_INCLUDE_BEGIN\' : \'{% \',		                \'DIV_TAG_INCLUDE_END\' : \' %}\',
 		\'DIV_TAG_PREPROCESSED_BEGIN\' : \'{%% \',		            \'DIV_TAG_PREPROCESSED_END\' : \' %%}\',
+		\'DIV_TAG_PREPROCESSED_SEPARATOR\' : \':\',		            
 		\'DIV_TAG_CAPSULE_BEGIN_PREFIX\' : \'[[\',		            \'DIV_TAG_CAPSULE_BEGIN_SUFFIX\' : \'\',
 		\'DIV_TAG_CAPSULE_END_PREFIX\' : \'\',		                \'DIV_TAG_CAPSULE_END_SUFFIX\' : \']]\',
 		\'DIV_TAG_MULTI_REPLACEMENT_BEGIN_PREFIX\' : \'{:\', 	    \'DIV_TAG_MULTI_REPLACEMENT_BEGIN_SUFFIX\' : \'}\',
@@ -2593,8 +2594,10 @@ class div {
 						
 						if ($go_index)
 							$anothers['_index'] = $ii - 1;
+						
 						if ($go_key)
 							$anothers['_key'] = $kk;
+						
 						if ($go_index_random) {
 							do {
 								$random = rand(1, $count);
@@ -2692,18 +2695,37 @@ class div {
 						
 						$engine->__items_orig = $xitems_orig[$xkey];
 						
+						// Save some vars
 						$memory = $engine->__memory;
 						
 						foreach ( $item as $kkk => $vvv )
 							if (isset($engine->__memory[$kkk]))
 								unset($engine->__memory[$kkk]);
 						
+						$dri = self::$__dont_remember_it;
+						
+						self::$__dont_remember_it = array_merge(self::$__dont_remember_it, array(
+								"_key" => true,
+								"_order" => true,
+								"_item" => true,
+								"_previus" => true,
+								"_next" => true,
+								"_is_odd" => true,
+								"_is_even" => true,
+								"_is_first" => true,
+								"_is_last" => true,
+								"_index" => true,
+								"_index_random" => true,
+								"_list" => true
+						));
+						
+						// Parse minihtml
 						$engine->parse(true, $xkey);
 						
+						// Rresore some vars
 						$engine->__memory = $memory;
-						
 						$engine->__items[$xkey] = $item;
-						
+						self::$__dont_remember_it = $dri;
 						self::$__globals_design = array_merge($tempglobal, self::$__globals_design);
 						
 						$break = strpos($engine->__src, DIV_TAG_BREAK);
@@ -3078,6 +3100,11 @@ class div {
 	 * @param mixed $items
 	 */
 	final public function parsePreprocessed($items){
+		
+		// Div doesn't know the future!
+		$items = array_merge($this->__memory, $items);
+		
+		// Tags
 		$prefix = DIV_TAG_PREPROCESSED_BEGIN;
 		$suffix = DIV_TAG_PREPROCESSED_END;
 		
@@ -3106,7 +3133,11 @@ class div {
 		$restore = array();
 		
 		$pos = 0;
+		$originalitems = $items;
 		while ( true ) {
+			
+			$items = $originalitems;
+			
 			$ranges = $this->getRanges($prefix, $suffix, null, true, $pos);
 			if (count($ranges) < 1)
 				break;
@@ -3134,10 +3165,10 @@ class div {
 						$pdata = self::getVarValue($pdata, $items);
 					else
 						$pdata = self::jsonDecode($pdata);
-				
-					if (is_object($pdata)) 
+					
+					if (is_object($pdata))
 						$pdata = get_object_vars($pdata);
-						
+					
 					$items = array_merge($items, $pdata);
 				}
 			}
@@ -3183,7 +3214,11 @@ class div {
 				
 				$engine->__path = $path;
 				self::$__includes_historial[] = $path;
+				
+				$originals = self::$__globals_design;
 				$engine->parse(false);
+				self::$__globals_design = $originals;
+				
 				$pre = $engine->__src;
 				
 				$this->__src = substr($this->__src, 0, $ini) . $pre . substr($this->__src, $fin + $l2);
@@ -5140,7 +5175,6 @@ class div {
 					break;
 				
 				case 'simple_replacement' :
-					
 					$value = self::getVarValue($params['key'], $items);
 					
 					if (is_null($value))

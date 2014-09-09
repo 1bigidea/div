@@ -1,4 +1,10 @@
 ----------------------------
+September 8,  2014
+----------------------------
+- bugfix: Parse pre-processed templates with all items/vars (Div doesn't know the future)
+- bigfix: Save injected vars (_key, _order, _index,...) on list's cycles
+
+----------------------------
 August 28,  2014
 ----------------------------
 - New feature for preprocessed templates: specific data
