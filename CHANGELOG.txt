@@ -1,4 +1,9 @@
 ----------------------------
+September 11,  2014
+----------------------------
+- bigfix: Save sections of loops and capsules when makeItAgain(); (Div doesn't know the future)
+
+----------------------------
 September 9,  2014
 ----------------------------
 - bugfix: Adding items to array in templates
@@ -11,7 +16,6 @@ September 9,  2014
 September 8,  2014
 ----------------------------
 - bugfix: Parse pre-processed templates with all items/vars (Div doesn't know the future)
-- bigfix: Save injected vars (_key, _order, _index,...) on list's cycles
 
 ----------------------------
 August 28,  2014
