@@ -1,11 +1,12 @@
 <table ?$attr [$attr] {$_key} = "{$value}" [/$attr] $attr?>
 <tr>
-?$orders <th>#</th> $orders? [${$data}.0]<th>{^_key}</th>[/${$data}.0]
+?$orders <th>#</th> $orders? [$data.0] !$hideColumns.{$_key} <th>?$headers.{$_key} {$headers.{$_key}} @else@ {^_key} $headers.{$_key}?</th> $hideColumns.{$_key}! [/$data.0]
 </tr>
 [${$data}]
 	<tr>
 		?$orders <td>{$_order}</td> $orders? 
-		[${$data}.{$_key}]
+		[$data.{$_key}]
+			!$hideColumns.{$_key}
 			{?( '{$_key}' != '_key' && '{$_key}' != '_order' )?}
 			<td>
 				?$wrappers.{$_key}
@@ -19,7 +20,8 @@
 				$wrappers.{$_key}?
 			</td>
 			{/?}
-		[/${$data}.{$_key}]
+			$hideColumns.{$_key}!
+		[/$data.{$_key}]
 	</tr>
 [/${$data}]
 </table>

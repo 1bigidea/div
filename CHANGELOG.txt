@@ -1,4 +1,55 @@
 ----------------------------
+September 21,  2014
+----------------------------
+- new feature: advanced options/params for includes
+
+	index.tpl
+	----------
+	
+	{% subtpl: {
+		from: "<!--{ begin }-->",
+		to: "<!--{ end }-->",
+		offset: 2,
+		limit: 1
+	} %}
+
+	subtpl.tpl
+	-------------
+	Any text...
+	
+	<!--{ begin }-->Some text 1<!--{ end }-->
+	
+	Any text...
+	
+	<!--{ begin }-->Some text 2<!--{ end }-->
+	
+	Any text
+	
+- bugfix: Preparing allowed methods before execute the macros
+----------------------------
+September 20,  2014
+----------------------------
+- bugfix: Parsing macros inside preprocessed templates. New argument $min_level for parse() method.
+- Add new allowed functions in macros, formulas and expressions: array_keys get_object_vars is_object
+- new static method div::div():
+
+	index.php
+	---------
+	<?php	
+		echo div::div('index.tpl', array("item1" => "value1"));
+	?>
+	
+- Allow T_BREAK token in macros for foreach and other loops. Then, the follow macro is an error:
+
+	index.tpl
+	---------
+	<? break; ?>
+	
+	Output
+	---------
+	Fatal error: Cannot break/continue 1 level in div.php: eval()'d code on line 1
+	
+----------------------------
 September 17,  2014
 ----------------------------
 - bugfix/improve - Parsing orphans's parts while checksum not change. Do it because the 
