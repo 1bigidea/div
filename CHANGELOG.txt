@@ -1,4 +1,10 @@
 ----------------------------
+September 23,  2014
+----------------------------
+- bugfix in parsePreprocessed() when $pdata is null
+- bugfix with number formats inside loops  
+
+----------------------------
 September 21,  2014
 ----------------------------
 - new feature: advanced options/params for includes
