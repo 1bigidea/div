@@ -1,4 +1,9 @@
 ----------------------------
+September 26,  2014
+----------------------------
+- bugfix parseData() vs parseMatch() logical order
+
+----------------------------
 September 23,  2014
 ----------------------------
 - bugfix in parsePreprocessed() when $pdata is null
