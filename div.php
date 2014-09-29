@@ -1478,6 +1478,7 @@ class div {
 						foreach ( $rs as $k => $v ) {
 							$rs[$k][2] = $key;
 							$rs[$k][3] = substr($src, $v[0] + $l2, $v[1] - $v[0] - $l2);
+							$rs[$k][4] = strlen($key);
 						}
 						$ranges = array_merge($ranges, $rs);
 						
@@ -1535,10 +1536,16 @@ class div {
 	 * @param integer $pos
 	 * @return boolean
 	 */
-	final public function searchInRanges($ranges, $pos){
+	final public function searchInRanges($ranges, $pos, $strict = false){
 		foreach ( $ranges as $range ) {
-			if ($pos >= $range[0] && $pos <= $range[1])
-				return true;
+			if ($strict) {
+				if ($pos > $range[0] && $pos < $range[1])
+					return true;
+			} else {
+				if ($pos >= $range[0] && $pos <= $range[1])
+					
+					return true;
+			}
 		}
 		return false;
 	}
@@ -2112,8 +2119,10 @@ class div {
 	 * @param string $src
 	 * @param string $key
 	 * @param mixed $value
+	 *
+	 * @see [1] ignoring conditional tag length, don't worry
 	 */
-	final public function parseMatch($key, $value, &$engine){
+	final public function parseMatch($key, $value, &$engine, $ignore_logical_order = false){
 		if (isset($this->__ignore[$key]))
 			return false;
 		
@@ -2142,17 +2151,14 @@ class div {
 		$suffix = DIV_TAG_REPLACEMENT_SUFFIX;
 		
 		if ($is_string || is_numeric($value)) {
+			if (! $ignore_logical_order) {
+				$p1 = strpos($this->__src, DIV_TAG_TPLVAR_BEGIN);
+				$p2 = strpos($this->__src, DIV_TAG_MACRO_BEGIN);
+			} else {
+				$p1 = false;
+				$p2 = false;
+			}
 			
-			$p1 = - 1;
-			do {
-				$p1 = strpos($this->__src, DIV_TAG_TPLVAR_BEGIN, $p1 + 1);
-			} while ( $this->searchInRanges($this->getConditionalRanges(true), $p1) && $p1 !== false );
-
-			$p2 = - 1;
-			do {
-				$p2 = strpos($this->__src, DIV_TAG_MACRO_BEGIN, $p2 + 1);
-			} while ( $this->searchInRanges($this->getConditionalRanges(true), $p2) && $p2 !== false );
-						
 			if ($p1 === false && $p2 === false)
 				$substr = $this->__src;
 			elseif ($p1 !== false && $p2 !== false) {
@@ -4065,7 +4071,7 @@ class div {
 	 * @param string $key
 	 * @param mixed $value
 	 */
-	final public function scanMatch($key, $value, $engine = null, &$items = null){
+	final public function scanMatch($key, $value, $engine = null, &$items = null, $ignore_logical_order = false){
 		if (is_null($items))
 			$items = &$this->__items;
 		if (is_null($engine))
@@ -4088,11 +4094,11 @@ class div {
 			
 			if (is_array($vars))
 				foreach ( $vars as $kk => $v )
-					$this->scanMatch("$key.$kk", $v, $engine, $items);
+					$this->scanMatch("$key.$kk", $v, $engine, $items, $ignore_logical_order);
 		}
 		
 		// Match this key
-		$this->parseMatch($key, $value, $engine);
+		$this->parseMatch($key, $value, $engine, $ignore_logical_order);
 		
 		// Match aggregate functions
 		if (is_object($value))
@@ -4103,7 +4109,11 @@ class div {
 			
 			$cant_values = count($value);
 			
-			$this->parseMatch($key, $cant_values, $engine);
+			$this->parseMatch($key, $cant_values, $engine, $ignore_logical_order);
+			
+			$sep = DIV_TAG_AGGREGATE_FUNCTION_SEPARATOR;
+			$fmax = DIV_TAG_AGGREGATE_FUNCTION_MAX;
+			$fmin = DIV_TAG_AGGREGATE_FUNCTION_MIN;
 			
 			if ($cant_values > 0) {
 				if (strpos($this->__src, $key) !== false) {
@@ -4111,20 +4121,17 @@ class div {
 						$sum = array_sum($value);
 						$keys = array_keys($value);
 						
-						$sep = DIV_TAG_AGGREGATE_FUNCTION_SEPARATOR;
-						$fmax = DIV_TAG_AGGREGATE_FUNCTION_MAX;
-						$fmin = DIV_TAG_AGGREGATE_FUNCTION_MIN;
-						
 						if ($cant_values > 1) {
-							$this->parseMatch($fmax . $sep . $key, max($value), $engine);
-							$this->parseMatch($fmin . $sep . $key, min($value), $engine);
+							$this->parseMatch($fmax . $sep . $key, max($value), $engine, $ignore_logical_order);
+							$this->parseMatch($fmin . $sep . $key, min($value), $engine, $ignore_logical_order);
 						} else {
-							$this->parseMatch($fmax . $sep . $key, $value[$keys[0]], $engine);
-							$this->parseMatch($fmin . $sep . $key, $value[$keys[0]], $engine);
+							
+							$this->parseMatch($fmax . $sep . $key, $value[$keys[0]], $engine, $ignore_logical_order);
+							$this->parseMatch($fmin . $sep . $key, $value[$keys[0]], $engine, $ignore_logical_order);
 						}
 						
-						$this->parseMatch(DIV_TAG_AGGREGATE_FUNCTION_SUM . $sep . $key, $sum, $engine);
-						$this->parseMatch(DIV_TAG_AGGREGATE_FUNCTION_AVG . $sep . $key, $sum / $cant_values, $engine);
+						$this->parseMatch(DIV_TAG_AGGREGATE_FUNCTION_SUM . $sep . $key, $sum, $engine, $ignore_logical_order);
+						$this->parseMatch(DIV_TAG_AGGREGATE_FUNCTION_AVG . $sep . $key, $sum / $cant_values, $engine, $ignore_logical_order);
 					}
 				}
 				
@@ -4158,6 +4165,12 @@ class div {
 								break;
 							
 							$range = $ranges[0];
+							
+							if ($this->searchInRanges($this->getRanges(DIV_TAG_MACRO_BEGIN, DIV_TAG_MACRO_END), $range[0])) {
+								$p = $range[0] + 1;
+								continue;
+							}
+							
 							$var = substr($this->__src, $range[0] + $l, $range[1] - ($range[0] + $l));
 							
 							if (strpos($var, DIV_TAG_SUBMATCH_SEPARATOR) !== false) {
@@ -4221,7 +4234,7 @@ class div {
 							$var = $ff . $key . DIV_TAG_AGGREGATE_FUNCTION_PROPERTY_SEPARATOR . $var;
 							$items[$var] = $res;
 							
-							$this->parseMatch($var, $res, $engine);
+							$this->parseMatch($var, $res, $engine, $ignore_logical_order);
 							$p = $range[0] + 1;
 						}
 					}
@@ -4295,7 +4308,7 @@ class div {
 	 *
 	 * @param array $items
 	 */
-	final public function parseMatches(&$items = null){
+	final public function parseMatches(&$items = null, $ignore_logical_order = false){
 		if (self::$__log_mode)
 			$this->logger("Parsing matches...");
 		if (is_null($items))
@@ -4330,7 +4343,7 @@ class div {
 		$engine = self::getAuxiliaryEngineClone($items);
 		if (is_array($items))
 			foreach ( $items as $key => $value )
-				$this->scanMatch($key, $value, $engine, $items);
+				$this->scanMatch($key, $value, $engine, $items, $ignore_logical_order);
 		
 		foreach ( $restore as $ukey => $part )
 			$this->__src = str_replace($ukey, $part, $this->__src);
@@ -4440,10 +4453,16 @@ class div {
 				$ini = $ranges[0][0];
 				$fin = $ranges[0][1];
 				
+				if ($this->searchInRanges($this->getConditionalRanges(true), $pos, true)) {
+					$pos = $ini + 1;
+					continue;
+				}
+				
 				if ($this->searchInListRanges($ini)) {
 					$pos = $ini + 1;
 					continue;
 				}
+				
 				if ($this->searchInListRanges($this->getRanges(DIV_TAG_ITERATION_BEGIN_PREFIX, DIV_TAG_ITERATION_END), $ini)) {
 					$pos = $ini + 1;
 					continue;
@@ -4548,9 +4567,14 @@ class div {
 		$r = array_merge($this->getBlockRanges(null, DIV_TAG_CONDITIONAL_TRUE_BEGIN_PREFIX, DIV_TAG_CONDITIONAL_TRUE_BEGIN_SUFFIX, DIV_TAG_CONDITIONAL_TRUE_END_PREFIX, DIV_TAG_CONDITIONAL_TRUE_END_SUFFIX), $this->getBlockRanges(null, DIV_TAG_CONDITIONAL_FALSE_BEGIN_PREFIX, DIV_TAG_CONDITIONAL_FALSE_BEGIN_SUFFIX, DIV_TAG_CONDITIONAL_FALSE_END_PREFIX, DIV_TAG_CONDITIONAL_FALSE_END_SUFFIX));
 		
 		$vars = array();
+		$ii = $this->getAllItems($items);
 		foreach ( $r as $tag ) {
+			
+			$otag = $tag;
+			$tag[2] = self::div($tag[2], $ii);
+			
 			if (self::issetVar($tag[2], $items)) {
-				$vars[$tag[2]] = self::getVarValue($tag[2], $items);
+				$vars[$otag[2]] = self::getVarValue($tag[2], $items);
 			} else {
 				$arr = explode('-', $tag[2]);
 				if (isset($arr[1]) && ! isset($arr[2])) { // count($arr) == 2
@@ -4561,11 +4585,10 @@ class div {
 						if (is_array($v)) {
 							foreach ( $v as $kk => $iv ) {
 								$vv = self::getVarValue($arr[1], $iv);
-								$nv = $arr[0] . '-' . $arr[1];
 								if (isset($vars[$nv]))
-									$vars[$nv] = self::mixedBool($vars[$nv]) || self::mixedBool($vv);
+									$vars[$otag[2]] = self::mixedBool($vars[$otag[2]]) || self::mixedBool($vv);
 								else
-									$vars[$nv] = self::mixedBool($vv);
+									$vars[$otag[2]] = self::mixedBool($vv);
 							}
 						}
 					}
@@ -5335,18 +5358,21 @@ class div {
 			$this->__temp['ini'] = $this->__temp['ranges'][0][0];
 			$this->__temp['fin'] = $this->__temp['ranges'][0][1];
 			
-			$this->__temp['r'] = $this->checkLogicalOrder($this->__temp['ini'], "", true, ! $ignore_previous_match, true, false);
-			
-			if ($this->searchInListRanges($this->__temp['ini'])) {
-				$this->__temp['p'] = $this->__temp['ini'] + 1;
-				continue;
+			if (! $ignore_previous_match) {
+				$this->__temp['r'] = $this->checkLogicalOrder($this->__temp['ini'], "", true, ! $ignore_previous_match, true, false);
+				
+				if ($this->searchInListRanges($this->__temp['ini'])) {
+					$this->__temp['p'] = $this->__temp['ini'] + 1;
+					continue;
+				}
+				
+				if ($this->__temp['r'] !== false) {
+					$this->__temp['p'] = $this->__temp['r'];
+					continue;
+				}
+			} else {
+				$this->__temp['r'] = false;
 			}
-			
-			if ($this->__temp['r'] !== false) {
-				$this->__temp['p'] = $this->__temp['r'];
-				continue;
-			}
-			
 			$this->__temp['code'] = trim(substr($this->__src, $this->__temp['ini'] + $l1, $this->__temp['fin'] - $this->__temp['ini'] - $l1));
 			$this->__temp['temp'] = uniqid();
 			
@@ -5830,6 +5856,8 @@ class div {
 			
 			$msg_infinite_cycle = 'Too many iterations of the parser: possible infinite cycle. Review your template code.';
 			
+			$last_action = false;
+			
 			do {
 				
 				$cycles1 = 0;
@@ -5890,9 +5918,7 @@ class div {
 						$this->parseMultipleModifiers();
 						
 						// Data in templates
-					
 					if (strpos($this->__src, DIV_TAG_TPLVAR_BEGIN) !== false)
-						
 						if (strpos($this->__src, DIV_TAG_TPLVAR_END) !== false) {
 							$items = array_merge($this->__memory, $items);
 							$this->parseData($items);
@@ -5918,15 +5944,16 @@ class div {
 						// Macros
 					if (strpos($this->__src, DIV_TAG_MACRO_BEGIN) !== false) {
 						$items = array_merge($this->__memory, $items);
-						$items = $this->parseMacros($items);
+						$items = $this->parseMacros($items, $last_action);
 						$this->memory($items);
 					}
 					
 					// Lists
 					if (strpos($this->__src, DIV_TAG_LOOP_BEGIN_PREFIX) !== false)
 						if (strpos($this->__src, DIV_TAG_LOOP_END_PREFIX) !== false)
-							if (strpos($this->__src, DIV_TAG_LOOP_END_SUFFIX) !== false)
+							if (strpos($this->__src, DIV_TAG_LOOP_END_SUFFIX) !== false) {
 								$this->parseList($items);
+							}
 					
 					$items = array_merge($items, self::$__globals_design);
 					
@@ -5951,11 +5978,11 @@ class div {
 					// Sub-Matches
 					if (self::atLeastOneString($this->__src, self::$__modifiers))
 						$this->parseSubmatches($items);
-									
+						
 						// Matches
 					if (self::atLeastOneString($this->__src, self::$__modifiers) || (strpos($this->__src, DIV_TAG_NUMBER_FORMAT_PREFIX) !== false && strpos($this->__src, DIV_TAG_NUMBER_FORMAT_SUFFIX) !== false))
-						$this->parseMatches($items);
-					
+						$this->parseMatches($items, $last_action);
+						
 						// Discard literal vars
 					if (strpos($this->__src, DIV_TAG_IGNORE_BEGIN) !== false || strpos($this->__src, '{' . $this->__ignore_secret_tag . '}') !== false)
 						$this->parseIgnore();
@@ -5970,7 +5997,12 @@ class div {
 					if (strpos($this->__src, DIV_TAG_ITERATION_BEGIN_PREFIX) !== false)
 						if (strpos($this->__src, DIV_TAG_ITERATION_END) !== false)
 							$this->parseIterations($items);
-				} while ( $checksum != crc32($this->__src) );
+					
+					$nowcrc = crc32($this->__src);
+					
+					if ($checksum != $nowcrc)
+						$last_action = false;
+				} while ( $checksum != $nowcrc );
 				
 				// Computing
 				if (strpos($this->__src, DIV_TAG_FORMULA_BEGIN) !== false)
@@ -5995,10 +6027,17 @@ class div {
 					// Div 4.5: One more time? Parsing orphans's parts while checksum not change.
 					// (do it because the orphan's parts stop the parser and the results are ugly)
 					// TODO: research best solution for this! (this is the second solution found)
+				
 				if ($checksum == crc32($this->__src) && self::$__parse_level <= $min_level) {
 					$this->parseOrphanParts();
 				}
-			} while ( $checksum != crc32($this->__src) );
+				
+				$nowcrc = crc32($this->__src);
+				
+				// Last action?
+				
+				$last_action = ($last_action === false && $nowcrc == $checksum);
+			} while ( $checksum != $nowcrc || $last_action === true );
 			
 			// Searching orphan parts (conditionals)
 			if (strpos($this->__src, DIV_TAG_CONDITIONAL_TRUE_BEGIN_PREFIX) !== false || strpos($this->__src, DIV_TAG_CONDITIONAL_FALSE_BEGIN_PREFIX) !== false)
@@ -6028,25 +6067,6 @@ class div {
 			
 			// The last action
 			if (self::$__parse_level <= $min_level) {
-				
-				// Parsing macros
-				for($i = 0; $i < 3; $i ++) { // 3 passes
-					if (strpos($this->__src, DIV_TAG_MACRO_BEGIN) !== false) {
-						$items = array_merge($this->__memory, $items);
-						$items = $this->parseMacros($items, true);
-						$this->memory($items);
-					}
-					
-					// Sub-Matches
-					if (self::atLeastOneString($this->__src, self::$__modifiers)) {
-						$this->parseSubmatches($items);
-					}
-					
-					// Matches
-					if (self::atLeastOneString($this->__src, self::$__modifiers) || (strpos($this->__src, DIV_TAG_NUMBER_FORMAT_PREFIX) !== false && strpos($this->__src, DIV_TAG_NUMBER_FORMAT_SUFFIX) !== false)) {
-						$this->parseMatches($items);
-					}
-				}
 				
 				$this->parseSpecialChars();
 				
@@ -6083,9 +6103,6 @@ class div {
 					}
 				}
 				$this->__memory = $items;
-				
-				// self::$__ignored_parts = array();
-				// self::$__globals_design = array();
 			}
 		}
 		
