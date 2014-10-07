@@ -8,10 +8,10 @@
 	</head>
 	<body>
 		<div class="page">
-			<a href="?page=home">Home</a>
+			<a href="?e=mvc&page=home">Home</a>
 			<h1>{$title} ({$foos})</h1> 
 			<ul>
-				[$foos] <li><a href="?page=foo&foo={$value}">{$value}</a></li> [/$foos]
+				[$foos] <li><a href="?e=mvc&page=foo&foo={$value}">{$value}</a></li> [/$foos]
 			</ul>
 			<hr/>
 			(( currentfoo ))

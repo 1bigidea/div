@@ -941,6 +941,26 @@ class div {
 	}
 	
 	/**
+	 * Return the saved operations in $__remember
+	 *
+	 * @return array:
+	 */
+	final static function getMemories(){
+		return self::$__remember;
+	}
+	
+	/**
+	 * Set operations saved previously
+	 *
+	 * @param array $memories
+	 */
+	final static function setMemories($memories){
+		foreach ( $memories as $k => $v ) {
+			self::$__remember[$k] = $v;
+		}
+	}
+	
+	/**
 	 * Add a custom variable's modifier
 	 *
 	 * @param string $prefix
@@ -6056,17 +6076,31 @@ class div {
 					$this->parseLocations();
 				
 				// Clear location's tags
-			if (strpos($this->__src, DIV_TAG_LOCATION_BEGIN) !== false)
-				$this->clearLocations();
+			$allitems = null;
+			
+			if (strpos($this->__src, DIV_TAG_LOCATION_BEGIN) !== false) {
+				$allitems = $this->getAllItems($items);
+				$clear = self::getVarValue("div.clear_locations", $allitems);
 				
-				// Restoring parsers requests
+				if (is_null($clear))
+					$clear = true;
+				
+				if ($clear)
+					$this->clearLocations();
+			}
+			
+			// Restoring parsers requests
 			foreach ( $this->__restore as $restore_id => $rest )
 				$this->__src = str_replace('{' . $restore_id . '}', $rest, $this->__src);
 			
 			$this->clean();
 			
 			// The last action
-			if (self::$__parse_level <= $min_level) {
+			if (self::$__parse_level <= 1) {
+				
+				// Clear location's tags
+				if (strpos($this->__src, DIV_TAG_LOCATION_BEGIN) !== false)
+					$this->clearLocations();
 				
 				$this->parseSpecialChars();
 				

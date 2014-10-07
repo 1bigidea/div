@@ -1,4 +1,30 @@
 ----------------------------
+October 6,  2014
+----------------------------
+- new setup var: div.clear_locations (= true by default). This means that the locations will 
+be clear or not at the end (parse_level = 0). Then, the component are more flexible 
+with pre-processed templates: 
+
+comp.tpl
+----------------
+(( before )) <input type="{$type}" name="{$name}"> (( after ))
+
+index.tpl
+----------------
+{%% comp: {
+	type: "text",
+	name: "first_name",
+	div: {
+		clear_locations: false
+	}
+} %%}
+
+<!--{ If div.clear_locations is true (by default), the next code don't work }-->
+
+{{before <label>First Name</label> before}}
+{{after <input type="submit"> after}}
+
+----------------------------
 September 26,  2014
 ----------------------------
 - bugfix parseData() vs parseMatch() logical order
