@@ -1,4 +1,11 @@
 ----------------------------
+October 7,  2014
+----------------------------
+- improve performance changing $vars with __temp['vars'] var 
+  in parseMacros(); because becasuse get_defined_vars return also 'vars' 
+- prevent infinite loops in div::cop(); 
+
+----------------------------
 October 6,  2014
 ----------------------------
 - new setup var: div.clear_locations (= true by default). This means that the locations will 
